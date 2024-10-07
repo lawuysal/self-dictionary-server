@@ -1,0 +1,5 @@
+# Get all items
+GET http://localhost:3005/api/items
+
+# Get item by id
+GET http://localhost:3005/api/items/bc325346-416b-4750-bac0-9eed6a49221e

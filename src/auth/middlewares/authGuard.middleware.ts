@@ -1,8 +1,8 @@
 import { Request, Response, NextFunction } from "express";
 import { StatusCodes } from "http-status-codes";
 import jwt from "jsonwebtoken";
-import rolesRepository from "@/src/roles/roles.repository";
 import asyncHandler from "@/src/utils/asyncHandler";
+import rolesRepository from "@/src/roles/roles.repository";
 
 interface AuthRequest extends Request {
   userId?: string;

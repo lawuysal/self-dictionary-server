@@ -2,7 +2,6 @@ import express from "express";
 import cors from "cors";
 import morgan from "morgan";
 import bodyParser from "body-parser";
-import itemsController from "./items/items.controller";
 import authController from "./auth/auth.controller";
 import rolesController from "./roles/roles.controller";
 import { globalErrorHandler } from "./middlewares/globalErrorMiddleware";
@@ -24,7 +23,6 @@ app.use(
   }),
 );
 
-app.use("/api/items", itemsController);
 app.use("/api/auth", authController);
 app.use("/api/roles", rolesController);
 

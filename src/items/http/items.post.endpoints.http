@@ -1,6 +1,0 @@
-POST http:localhost:3005/api/items
-Content-Type: application/json
-{
-  "name": "Test item 2",
-  "type": "test type 2"
-}

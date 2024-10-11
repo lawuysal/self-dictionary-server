@@ -44,9 +44,3 @@ model RolesOnUsers {
   @@id([userId, roleId]) 
 }
 
-model Item {
-  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  name        String
-  type        String?
-  createdAt   DateTime @default(now())
-}

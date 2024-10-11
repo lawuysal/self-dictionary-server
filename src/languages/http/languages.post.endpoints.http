@@ -1,0 +1,10 @@
+// Create a language
+
+POST http://localhost:3005/api/languages
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI1NDM0MjQ1Yy03NzE4LTRiMDUtYmFiYi02OTljNmJiOTIwYTYiLCJpYXQiOjE3Mjg2NjExMzIsImV4cCI6MTcyODc0NzUzMn0.-ObUluiVtGUUy-zSIcdeig_-9ijXm9F55epEaRim9jA
+{
+  "name": "English",
+  "description": "English language",
+  "ownerId": "5434245c-7718-4b05-babb-699c6bb920a6"
+}

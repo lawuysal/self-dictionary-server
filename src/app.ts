@@ -2,8 +2,9 @@ import express from "express";
 import cors from "cors";
 import morgan from "morgan";
 import bodyParser from "body-parser";
-import authController from "./auth/auth.controller";
-import rolesController from "./roles/roles.controller";
+import { authController } from "./auth/auth.controller";
+import { rolesController } from "./roles/roles.controller";
+import { languagesController } from "./languages/languages.controller";
 import { globalErrorHandler } from "./middlewares/globalErrorMiddleware";
 
 const app = express();
@@ -25,6 +26,7 @@ app.use(
 
 app.use("/api/auth", authController);
 app.use("/api/roles", rolesController);
+app.use("/api/languages", languagesController);
 
 app.use(globalErrorHandler);
 

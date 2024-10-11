@@ -88,4 +88,4 @@ async function loginUser(
   return { token, userId: user.id };
 }
 
-export default { loginUser, signupUser };
+export const authRepository = { loginUser, signupUser };

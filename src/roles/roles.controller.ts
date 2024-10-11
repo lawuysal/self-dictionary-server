@@ -2,7 +2,7 @@ import { Router, Request } from "express";
 import { StatusCodes } from "http-status-codes";
 import { CreateRoleDto, CreateRoleSchema } from "./dtos/createRole.dto";
 import { authGuard } from "../auth/middlewares/authGuard.middleware";
-import rolesRepository from "./roles.repository";
+import { rolesRepository } from "./roles.repository";
 import asyncHandler from "../utils/asyncHandler";
 
 const router = Router();
@@ -57,10 +57,17 @@ router.route("/user/:userId").get(
 router.route("/:id").delete(
   authGuard("ADMIN"),
   asyncHandler(async (req, res) => {
-    const role = await rolesRepository.deleteRole(req.params.id);
+    let role = await rolesRepository.getRoleById(req.params.id);
+
+    if (!role) {
+      res.status(StatusCodes.NOT_FOUND).json({ error: "Role not found" });
+      return;
+    }
+
+    role = await rolesRepository.deleteRole(req.params.id);
 
     res.status(StatusCodes.OK).json(role);
   }),
 );
 
-export default router;
+export const rolesController = router;

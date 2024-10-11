@@ -108,7 +108,7 @@ async function deleteRole(id: string): Promise<Role> {
   return role;
 }
 
-export default {
+export const rolesRepository = {
   createRole,
   getRoles,
   getRoleById,

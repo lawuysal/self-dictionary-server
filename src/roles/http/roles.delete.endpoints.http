@@ -1,4 +1,4 @@
 // Delete a role with id
-DELETE http://localhost:3005/api/roles/327290fe-fdbb-4c61-a029-a53293b8c1e7
+DELETE http://localhost:3005/api/roles/327290fe-fdbb-4c61-a029-a53293b8c1e8
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2ZjViZGZmZC0yNjc3LTQ5N2QtOTBkZi0xOWIwNjc2MDdkZmYiLCJpYXQiOjE3Mjg2MDY3NzMsImV4cCI6MTcyODYwNjc4OH0.yrNBs5j0kpZTXzT0UjQ0n21AeI1QNvJpf5NxB4Svapk
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2ZjViZGZmZC0yNjc3LTQ5N2QtOTBkZi0xOWIwNjc2MDdkZmYiLCJpYXQiOjE3Mjg2NjAxMTUsImV4cCI6MTcyODc0NjUxNX0.LDACpCsLNcKla3V8yMeYS4MPSnAMIdLTn5r45_vrAKQ

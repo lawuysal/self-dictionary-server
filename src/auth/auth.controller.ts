@@ -1,7 +1,7 @@
 import express, { Request } from "express";
 import { SignupUserDto, SignupUserSchema } from "./dtos/signupUser.dto";
 import { LoginUserDto, LoginUserSchema } from "./dtos/loginUser.dto";
-import authRepository from "./auth.repository";
+import { authRepository } from "./auth.repository";
 import { StatusCodes } from "http-status-codes";
 import asyncHandler from "../utils/asyncHandler";
 
@@ -40,4 +40,4 @@ router.route("/login").post(
   }),
 );
 
-export default router;
+export const authController = router;

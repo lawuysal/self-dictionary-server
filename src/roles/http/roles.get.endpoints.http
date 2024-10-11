@@ -1,6 +1,6 @@
 // Get all roles ("ADMIN")
 GET http://localhost:3005/api/roles
-Authorization: Bearer token
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2ZjViZGZmZC0yNjc3LTQ5N2QtOTBkZi0xOWIwNjc2MDdkZmYiLCJpYXQiOjE3Mjg2NjAxMTUsImV4cCI6MTcyODc0NjUxNX0.LDACpCsLNcKla3V8yMeYS4MPSnAMIdLTn5r45_vrAKQ
 
 // Get role by id ("ADMIN")
 GET http://localhost:3005/api/roles/96c72cd6-e420-49a3-a82e-7e0fb6acdb92

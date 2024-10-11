@@ -1,0 +1,12 @@
+// Get all languages
+
+GET http://localhost:3005/api/languages
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI1NDM0MjQ1Yy03NzE4LTRiMDUtYmFiYi02OTljNmJiOTIwYTYiLCJpYXQiOjE3Mjg2NjExMzIsImV4cCI6MTcyODc0NzUzMn0.-ObUluiVtGUUy-zSIcdeig_-9ijXm9F55epEaRim9jA
+
+// Get a language by id
+GET http://localhost:3005/api/languages/78694272-a1a0-4465-b162-28508334759f
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI1NDM0MjQ1Yy03NzE4LTRiMDUtYmFiYi02OTljNmJiOTIwYTYiLCJpYXQiOjE3Mjg2NjExMzIsImV4cCI6MTcyODc0NzUzMn0.-ObUluiVtGUUy-zSIcdeig_-9ijXm9F55epEaRim9jA
+
+// Get all languages by owner id
+GET http://localhost:3005/api/languages/user/5434245c-7718-4b05-babb-699c6bb920a6
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI1NDM0MjQ1Yy03NzE4LTRiMDUtYmFiYi02OTljNmJiOTIwYTYiLCJpYXQiOjE3Mjg2NjExMzIsImV4cCI6MTcyODc0NzUzMn0.-ObUluiVtGUUy-zSIcdeig_-9ijXm9F55epEaRim9jA

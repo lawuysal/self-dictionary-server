@@ -2,7 +2,7 @@
 POST http://localhost:3005/api/auth/signup
 Content-Type: application/json
 {
-  "email": "lawuysal@outlook.com",
+  "email": "law-tekken3@hotmail.com",
   "password": "123ray"
 }
 

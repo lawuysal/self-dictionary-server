@@ -14,33 +14,90 @@ datasource db {
 }
 
 model User {
-  id        String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  id        String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   firstName String?
   lastName  String?
-  username  String?   @unique
+  username  String? @unique
   photoUrl  String?
-  email     String    @unique
+  email     String  @unique
   password  String
+
   createdAt DateTime  @default(now())
   updatedAt DateTime? @updatedAt
-  roles     RolesOnUsers[]
+
+  // One to many
+  languages Language[]
+
+  // Many to many
+  roles      RolesOnUsers[]
+  savedNotes NotesSavedOnUsers[]
 }
 
 model Role {
-  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  name        String   @unique
+  id          String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name        String  @unique
   description String?
-  createdAt   DateTime @default(now())
-  users       RolesOnUsers[]
+
+  createdAt DateTime @default(now())
+
+  // Many to many
+  users RolesOnUsers[]
 }
 
 model RolesOnUsers {
-  userId     String     @db.Uuid
-  roleId     String     @db.Uuid
-  assignedAt DateTime   @default(now())
-  user       User       @relation(fields: [userId], references: [id])
-  role       Role       @relation(fields: [roleId], references: [id])
+  userId String @db.Uuid
+  roleId String @db.Uuid
 
-  @@id([userId, roleId]) 
+  assignedAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+  role Role @relation(fields: [roleId], references: [id])
+
+  @@id([userId, roleId])
 }
 
+model Language {
+  id          String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name        String  @unique
+  description String?
+
+  createdAt DateTime  @default(now())
+  editedAt  DateTime? @updatedAt
+
+  owner   User   @relation(fields: [ownerId], references: [id])
+  ownerId String @db.Uuid
+
+  // One to many
+  notes Note[]
+}
+
+model Note {
+  id          String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name        String  @unique
+  description String?
+  meaning     String
+  properties  String?
+  intensity   Int     @default(0)
+  isPublic    Boolean @default(false)
+
+  createdAt DateTime  @default(now())
+  editedAt  DateTime? @updatedAt
+
+  language   Language @relation(fields: [languageId], references: [id])
+  languageId String   @db.Uuid
+
+  // Many to many
+  savedBy NotesSavedOnUsers[]
+}
+
+model NotesSavedOnUsers {
+  userId String @db.Uuid
+  noteId String @db.Uuid
+
+  savedAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+  note Note @relation(fields: [noteId], references: [id])
+
+  @@id([userId, noteId])
+}

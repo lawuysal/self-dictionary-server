@@ -45,7 +45,7 @@ router.route("/:id").get(
 // Find roles of a given user Id
 // GET api/roles/user/:userId
 router.route("/user/:userId").get(
-  asyncHandler(async (req, res) => {
+  asyncHandler(async (req: Request, res) => {
     const roles = await rolesRepository.getRolesByUserId(req.params.userId);
 
     res.status(StatusCodes.OK).json(roles);

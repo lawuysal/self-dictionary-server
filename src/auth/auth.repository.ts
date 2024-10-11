@@ -6,7 +6,22 @@ import { LoginUserDto } from "./dtos/loginUser.dto";
 import { AppError } from "../middlewares/globalErrorMiddleware";
 import { StatusCodes } from "http-status-codes";
 
-async function signupUser(signupData: SignupUserDto) {
+/**
+ * Signs up the new user and returns a JWT token and user ID.
+ * @async
+ *
+ * @param {SignupUserDto} signupData - The login credentials for the user.
+ * @param {string} loginData.mail - The user's email address.
+ * @param {string} loginData.password - The user's password.
+ * @returns {Promise<{ token: string; userId: string }} A promise that resolves to an object containing the token and user ID if signup is successful, or null if the login fails.
+ *
+ * @throws {AppError} Throws an AppError (HTTP 409) if there is an exsiting user with the same email address.
+ * @throws {AppError} Throws an AppError (HTTP 404) if the role is not found.
+ * @throws {Error} Throws an error if there is an issue with the database or other unexpected errors.
+ */
+async function signupUser(
+  signupData: SignupUserDto,
+): Promise<{ token: string; userId: string }> {
   const { email, password } = signupData;
 
   const existingUser = await prisma.user.findUnique({ where: { email } });
@@ -40,7 +55,20 @@ async function signupUser(signupData: SignupUserDto) {
   return { token, userId: user.id };
 }
 
-async function loginUser(loginData: LoginUserDto) {
+/**
+ * Logs in a user and returns a JWT token and user ID.
+ * @async
+ *
+ * @param {LoginUserDto} loginData - The login credentials for the user.
+ * @param {string} loginData.mail - The user's email address.
+ * @param {string} loginData.password - The user's password.
+ * @returns {Promise<{ token: string; userId: string } | null>} A promise that resolves to an object containing the token and user ID if login is successful, or null if the login fails.
+ *
+ * @throws {Error} Throws an error if there is an issue with the database or other unexpected errors.
+ */
+async function loginUser(
+  loginData: LoginUserDto,
+): Promise<{ token: string; userId: string } | null> {
   const { email, password } = loginData;
 
   const user = await prisma.user.findUnique({ where: { email } });

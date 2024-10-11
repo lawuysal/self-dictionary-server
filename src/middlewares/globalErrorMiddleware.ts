@@ -25,11 +25,6 @@ export const globalErrorHandler = (
     return;
   }
 
-  if (err instanceof AppError) {
-    res.status(err.statusCode).json({ error: err.message });
-    return;
-  }
-
   if (err instanceof jwt.TokenExpiredError) {
     res.status(StatusCodes.UNAUTHORIZED).json({ error: "Token has expired" });
     return;
@@ -37,6 +32,11 @@ export const globalErrorHandler = (
 
   if (err instanceof jwt.JsonWebTokenError) {
     res.status(StatusCodes.UNAUTHORIZED).json({ error: "Invalid token" });
+    return;
+  }
+
+  if (err instanceof AppError) {
+    res.status(err.statusCode).json({ error: err.message });
     return;
   }
 

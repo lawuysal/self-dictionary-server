@@ -1,0 +1,8 @@
+// Get all roles
+GET http://localhost:3005/api/roles
+
+// Get role by id
+GET http://localhost:3005/api/roles/96c72cd6-e420-49a3-a82e-7e0fb6acdb92
+
+// Get roles of a user by user id
+GET http://localhost:3005/api/roles/user/6f5bdffd-2677-497d-90df-19b067607dff

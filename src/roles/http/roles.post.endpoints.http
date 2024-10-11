@@ -1,0 +1,7 @@
+POST http://localhost:3005/api/roles
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2ZjViZGZmZC0yNjc3LTQ5N2QtOTBkZi0xOWIwNjc2MDdkZmYiLCJpYXQiOjE3Mjg2MDQ1MjUsImV4cCI6MTcyODYwODEyNX0.cX0hrRng65PBlvvX_eEtUghxNNleVG_VYaJ4K-Neh30
+{
+  "name": "TEST ROLE",
+  "description": "Test Role role for the application"
+}

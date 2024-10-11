@@ -1,22 +1,22 @@
-import { supabase } from "../db/supabase";
 import { ItemPostRequestDTO } from "./dtos/item-post-request.dto";
+import { prisma } from "../../prisma/client";
 
 async function getAllItems() {
-  const { data, error } = await supabase.from("items").select();
+  const items = await prisma.item.findMany();
 
-  return { data, error };
+  return { items };
 }
 
 async function getItemById(id: string) {
-  const { data, error } = await supabase.from("items").select().eq("id", id);
+  const item = await prisma.item.findUnique({ where: { id } });
 
-  return { data, error };
+  return { item };
 }
 
-async function createItem(item: ItemPostRequestDTO) {
-  const { data, error } = await supabase.from("items").insert([item]).select();
+async function createItem(itemData: ItemPostRequestDTO) {
+  const item = await prisma.item.create({ data: itemData });
 
-  return { data, error };
+  return { item };
 }
 
 export default { getAllItems, createItem, getItemById };

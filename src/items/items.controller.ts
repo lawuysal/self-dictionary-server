@@ -2,20 +2,14 @@ import { Router, Request } from "express";
 import itemsRepository from "./items.repository";
 import { StatusCodes } from "http-status-codes";
 import { ItemPostRequestDTO } from "./dtos/item-post-request.dto";
+import { authGuard } from "../auth/middlewares/authGuard.middleware";
 
 const router = Router();
 
 // Get all items
 // GET: /api/items
-router.route("/").get(async (req, res) => {
-  const { data: items, error } = await itemsRepository.getAllItems();
-
-  if (error) {
-    res
-      .status(StatusCodes.INTERNAL_SERVER_ERROR)
-      .json({ error: error.message });
-    return;
-  }
+router.route("/").get(authGuard("USER"), async (req, res) => {
+  const items = await itemsRepository.getAllItems();
 
   res.status(StatusCodes.OK).json(items);
 });
@@ -23,16 +17,7 @@ router.route("/").get(async (req, res) => {
 // Get an item by id
 // GET: /api/items/:id
 router.route("/:id").get(async (req, res) => {
-  const { data: item, error } = await itemsRepository.getItemById(
-    req.params.id,
-  );
-
-  if (error) {
-    res
-      .status(StatusCodes.INTERNAL_SERVER_ERROR)
-      .json({ error: error.message });
-    return;
-  }
+  const item = await itemsRepository.getItemById(req.params.id);
 
   if (!item) {
     res.status(StatusCodes.NOT_FOUND).json({ error: "Item not found" });
@@ -47,14 +32,7 @@ router.route("/:id").get(async (req, res) => {
 router
   .route("/")
   .post(async (req: Request<unknown, unknown, ItemPostRequestDTO>, res) => {
-    const { data: item, error } = await itemsRepository.createItem(req.body);
-
-    if (error) {
-      res
-        .status(StatusCodes.INTERNAL_SERVER_ERROR)
-        .json({ error: error.message });
-      return;
-    }
+    const item = await itemsRepository.createItem(req.body);
 
     res.status(StatusCodes.CREATED).json(item);
   });

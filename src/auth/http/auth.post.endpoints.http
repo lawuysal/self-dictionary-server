@@ -1,0 +1,15 @@
+#Signup a user
+POST http://localhost:3005/api/auth/signup
+Content-Type: application/json
+{
+  "email": "lawuysal@outlook.com",
+  "password": "123ray"
+}
+
+# Login user
+POST http://localhost:3005/api/auth/login
+Content-Type: application/json
+{
+  "email": "lawuysal@outlook.com",
+  "password": "123ray"
+}

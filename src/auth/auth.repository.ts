@@ -8,13 +8,13 @@ import { StatusCodes } from "http-status-codes";
 import { Roles } from "../roles/enums/roles.enum";
 
 /**
- * Signs up the new user and returns a JWT token and user ID.
+ * Signs up the new user, assgings the USER role and returns a JWT token and user ID.
  * @async
  *
- * @param {SignupUserDto} signupData - The login credentials for the user.
- * @param {string} loginData.mail - The user's email address.
- * @param {string} loginData.password - The user's password.
- * @returns {Promise<{ token: string; userId: string }} A promise that resolves to an object containing the token and user ID if signup is successful, or null if the login fails.
+ * @param {SignupUserDto} signupData - The signup credentials for the user.
+ * @param {string} signupData.mail - The user's email address.
+ * @param {string} signupData.password - The user's password.
+ * @returns {Promise<{ token: string; userId: string }} A promise that resolves to an object containing the token and user ID if signup is successful, or null if the signup fails.
  *
  * @throws {AppError} Throws an AppError (HTTP 409) if there is an exsiting user with the same email address.
  * @throws {AppError} Throws an AppError (HTTP 404) if the role is not found.

@@ -58,6 +58,9 @@ async function getLanguagesByUserId(userId: string): Promise<Language[]> {
  * @async
  *
  * @param {CreateLanguageRequestDto} languageData - The data to create the language.
+ * @param {string} languageData.name - The name of the language.
+ * @param {string | null} languageData.description - The description of the language.
+ * @param {string} languageData.ownerId - The id of the user that owns the language.
  * @param {string} userId - The id of the user creating the language.
  *
  * @returns {Promise<Language>} A promise that resolves to the created language.
@@ -80,6 +83,9 @@ async function createLanguage(
  *
  * @param {string} id - The id of the language to update.
  * @param {UpdateLanguageRequestDto} updateData - The data to update the language.
+ * @param {string} updateData.name - The name of the language.
+ * @param {string | null} updateData.description - The description of the language.
+ * @param {string} updateData.ownerId - The id of the user that owns the language.
  *
  * @returns {Promise<Language>} A promise that resolves to the updated language.
  *

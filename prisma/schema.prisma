@@ -15,15 +15,15 @@ datasource db {
 
 model User {
   id        String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  firstName String?
-  lastName  String?
-  username  String? @unique
-  photoUrl  String?
   email     String  @unique
   password  String
 
   createdAt DateTime  @default(now())
   updatedAt DateTime? @updatedAt
+
+  // One to one
+  profile     Profile?
+  preferences Preference?
 
   // One to many
   languages Language[]
@@ -100,4 +100,29 @@ model NotesSavedOnUsers {
   note Note @relation(fields: [noteId], references: [id])
 
   @@id([userId, noteId])
+}
+
+model Profile {
+  id        String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  firstName String?
+  lastName  String?
+  username  String? @unique
+  photoUrl  String?
+  bio       String?
+
+  updatedAt DateTime? @updatedAt
+
+  owner   User   @relation(fields: [ownerId], references: [id])
+  ownerId String @unique @db.Uuid
+}
+
+model Preference {
+  id       String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  theme    String @default("light")
+  language String @default("en")
+
+  updatedAt DateTime? @updatedAt
+
+  owner   User   @relation(fields: [ownerId], references: [id])
+  ownerId String @unique @db.Uuid
 }

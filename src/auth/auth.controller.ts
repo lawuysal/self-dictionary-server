@@ -4,6 +4,8 @@ import { LoginUserDto, LoginUserSchema } from "./dtos/loginUser.dto";
 import { authRepository } from "./auth.repository";
 import { StatusCodes } from "http-status-codes";
 import asyncHandler from "../utils/asyncHandler";
+import { authGuard } from "./middlewares/authGuard.middleware";
+import { Roles } from "../roles/enums/roles.enum";
 
 const router = express.Router();
 
@@ -39,5 +41,11 @@ router.route("/login").post(
     res.json({ token, userId });
   }),
 );
+
+// Return the user id of the user with the given token
+// GET: /api/auth/me
+router.route("/me").get(authGuard(Roles.USER), (req, res) => {
+  res.status(StatusCodes.OK).json({ userId: req.userId });
+});
 
 export const authController = router;

@@ -10,7 +10,7 @@ import { globalErrorHandler } from "./middlewares/globalErrorMiddleware";
 const app = express();
 
 // using morgan for logs
-app.use(morgan("combined"));
+app.use(morgan("dev"));
 
 app.use(bodyParser.urlencoded({ extended: true }));
 

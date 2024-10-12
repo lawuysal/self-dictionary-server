@@ -5,7 +5,16 @@ import asyncHandler from "@/src/utils/asyncHandler";
 import { rolesRepository } from "@/src/roles/roles.repository";
 import { Roles } from "@/src/roles/enums/roles.enum";
 
-export function authGuard(role: string) {
+/**
+ * Middleware to check if the user is authenticated and has the specified role.
+ *
+ * @param {string} role - The role to check for.
+ *
+ * @returns {(req: Request, res: Response, next: NextFunction) => void} A middleware function.
+ */
+export function authGuard(
+  role: string,
+): (req: Request, res: Response, next: NextFunction) => void {
   return asyncHandler(async function (
     req: Request,
     res: Response,

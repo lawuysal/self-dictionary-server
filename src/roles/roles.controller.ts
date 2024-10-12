@@ -4,13 +4,14 @@ import { CreateRoleDto, CreateRoleSchema } from "./dtos/createRole.dto";
 import { authGuard } from "../auth/middlewares/authGuard.middleware";
 import { rolesRepository } from "./roles.repository";
 import asyncHandler from "../utils/asyncHandler";
+import { Roles } from "./enums/roles.enum";
 
 const router = Router();
 
 // Create a new role
 // POST api/roles
 router.route("/").post(
-  authGuard("ADMIN"),
+  authGuard(Roles.ADMIN),
   asyncHandler(async (req: Request<unknown, unknown, CreateRoleDto>, res) => {
     const parsedRole = CreateRoleSchema.parse(req.body);
 
@@ -23,7 +24,7 @@ router.route("/").post(
 // Get all roles
 // GET api/roles
 router.route("/").get(
-  authGuard("ADMIN"),
+  authGuard(Roles.ADMIN),
   asyncHandler(async (req, res) => {
     const roles = await rolesRepository.getRoles();
 
@@ -34,7 +35,7 @@ router.route("/").get(
 // Get a role by Id
 // GET api/roles/:id
 router.route("/:id").get(
-  authGuard("ADMIN"),
+  authGuard(Roles.ADMIN),
   asyncHandler(async (req, res) => {
     const role = await rolesRepository.getRoleById(req.params.id);
 
@@ -55,7 +56,7 @@ router.route("/user/:userId").get(
 // Delete a role by Id
 // DELETE api/roles/:id
 router.route("/:id").delete(
-  authGuard("ADMIN"),
+  authGuard(Roles.ADMIN),
   asyncHandler(async (req, res) => {
     let role = await rolesRepository.getRoleById(req.params.id);
 

@@ -5,6 +5,7 @@ import jwt from "jsonwebtoken";
 import { LoginUserDto } from "./dtos/loginUser.dto";
 import { AppError } from "../middlewares/globalErrorMiddleware";
 import { StatusCodes } from "http-status-codes";
+import { Roles } from "../roles/enums/roles.enum";
 
 /**
  * Signs up the new user and returns a JWT token and user ID.
@@ -35,7 +36,7 @@ async function signupUser(
     data: { email, password: hashedPassword },
   });
 
-  const role = await prisma.role.findFirst({ where: { name: "USER" } });
+  const role = await prisma.role.findFirst({ where: { name: Roles.USER } });
 
   if (!role) {
     throw new AppError("Role not found", StatusCodes.NOT_FOUND);

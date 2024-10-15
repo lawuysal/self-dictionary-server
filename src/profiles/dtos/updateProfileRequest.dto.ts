@@ -4,7 +4,7 @@ export const UpdateProfileRequestSchema = z.object({
   firstName: z.string().min(2).max(30),
   lastName: z.string().min(2).max(30).nullable(),
   bio: z.string().max(150).nullable(),
-  photoUrl: z.string().url().nullable(),
+  photoUrl: z.string().nullable(),
   username: z.string().min(2).max(30).toLowerCase(),
   ownerId: z.string().uuid(),
 });

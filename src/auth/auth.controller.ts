@@ -6,20 +6,9 @@ import { StatusCodes } from "http-status-codes";
 import asyncHandler from "../utils/asyncHandler";
 import { authGuard } from "./middlewares/authGuard.middleware";
 import { Roles } from "../roles/enums/roles.enum";
+import { profilesRepository } from "../profiles/profiles.repository";
 
 const router = express.Router();
-
-// Signup user and return a JWT token and user id
-// POST: /api/auth/signup
-router.route("/signup").post(
-  asyncHandler(async (req: Request<unknown, unknown, SignupUserDto>, res) => {
-    const parsedBody = SignupUserSchema.parse(req.body);
-
-    const { token, userId } = await authRepository.signupUser(parsedBody);
-
-    res.json({ token, userId });
-  }),
-);
 
 // Login user and return a JWT token
 // POST: /api/auth/login
@@ -38,7 +27,30 @@ router.route("/login").post(
 
     const { token, userId } = result;
 
-    res.json({ token, userId });
+    let hasProfile = false;
+    const profile = await profilesRepository.getProfileByUserId(userId);
+
+    if (profile) {
+      hasProfile = true;
+    }
+
+    res.json({ token, userId, userEmail: parsedBody.email, hasProfile });
+  }),
+);
+
+// Signup user and return a JWT token and user id
+// POST: /api/auth/signup
+router.route("/signup").post(
+  asyncHandler(async (req: Request<unknown, unknown, SignupUserDto>, res) => {
+    const parsedBody = SignupUserSchema.parse(req.body);
+
+    const { token, userId } = await authRepository.signupUser(parsedBody);
+
+    res.status(StatusCodes.OK).json({
+      token,
+      userId,
+      userEmail: parsedBody.email,
+    });
   }),
 );
 

@@ -18,7 +18,7 @@ import {
 const router = Router();
 
 const ParamsIdSchema = z.object({
-  id: z.string().uuid(),
+  id: z.string(),
 });
 
 // Get all profiles
@@ -74,8 +74,8 @@ router.route("/:id").get(
 );
 
 // Get profile by user id
-// GET: /api/profiles/user/:userId
-router.route("/user/:userId").get(
+// GET: /api/profiles/user/:id
+router.route("/user/:id").get(
   authGuard(Roles.USER),
   asyncHandler(async (req, res) => {
     const userId = req.userId;

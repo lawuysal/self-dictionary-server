@@ -118,7 +118,7 @@ model Profile {
 
 model Preference {
   id       String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  theme    String @default("light")
+  theme    String @default("system")
   language String @default("en")
 
   updatedAt DateTime? @updatedAt

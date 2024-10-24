@@ -64,8 +64,8 @@ router.route("/:id").get(
 );
 
 // Get languages by user id
-// GET: /api/languages/user/:userId
-router.route("/user/:userId").get(
+// GET: /api/languages/user/:id
+router.route("/user/:id").get(
   authGuard(Roles.USER),
   asyncHandler(async (req, res) => {
     const userId = req.userId;
@@ -76,8 +76,18 @@ router.route("/user/:userId").get(
       return;
     }
 
+    const parsedParams = ParamsIdSchema.safeParse(req.params);
+
+    // Check if params are in the right type
+    if (!parsedParams.success) {
+      res.status(StatusCodes.BAD_REQUEST).json({ error: "Invalid user id" });
+      return;
+    }
+
+    const requestedUserId = parsedParams.data.id;
+
     // Check if user is admin or owner of the language
-    if (!req.isAdmin && req.params.userId !== userId) {
+    if (!req.isAdmin && requestedUserId !== userId) {
       res.status(StatusCodes.FORBIDDEN).json({ error: "Forbidden" });
       return;
     }

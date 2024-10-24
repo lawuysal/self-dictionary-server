@@ -14,9 +14,9 @@ datasource db {
 }
 
 model User {
-  id        String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  email     String  @unique
-  password  String
+  id       String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  email    String @unique
+  password String
 
   createdAt DateTime  @default(now())
   updatedAt DateTime? @updatedAt
@@ -73,9 +73,9 @@ model Language {
 
 model Note {
   id          String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  name        String  @unique
+  name        String
   description String?
-  meaning     String
+  translation String
   properties  String?
   intensity   Int     @default(0)
   isPublic    Boolean @default(false)

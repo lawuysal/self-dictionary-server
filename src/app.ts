@@ -8,6 +8,7 @@ import { languagesController } from "./languages/languages.controller";
 import { globalErrorHandler } from "./middlewares/globalErrorMiddleware";
 import { profilesController } from "./profiles/profiles.controller";
 import { preferencesController } from "./preferences/preferences.controller";
+import { notesController } from "./notes/notes.controller";
 
 const app = express();
 
@@ -31,6 +32,7 @@ app.use("/api/roles", rolesController);
 app.use("/api/profiles", profilesController);
 app.use("/api/preferences", preferencesController);
 app.use("/api/languages", languagesController);
+app.use("/api/notes", notesController);
 
 app.use(globalErrorHandler);
 

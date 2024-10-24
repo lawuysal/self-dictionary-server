@@ -3,7 +3,7 @@ import { z } from "zod";
 export const UpdateLanguageRequestSchema = z.object({
   name: z
     .string()
-    .min(3, "A language name must be at least 3 characters long.")
+    .min(2, "A language name must be at least 2 characters long.")
     .max(25, "A language name must be at most 25 characters."),
   description: z
     .string()
@@ -11,7 +11,7 @@ export const UpdateLanguageRequestSchema = z.object({
       5,
       "A language description must be empty or at least 5 characters long.",
     )
-    .max(100, "A language description must be at most 100 characters")
+    .max(200, "A language description must be at most 200 characters")
     .nullable(),
   ownerId: z.string().uuid(),
 });

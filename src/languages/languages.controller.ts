@@ -45,7 +45,19 @@ router.route("/:id").get(
       return;
     }
 
-    const language = await languagesRepository.getLanguageById(req.params.id);
+    const parsedParams = ParamsIdSchema.safeParse(req.params);
+
+    // Check if params are in the right type
+    if (!parsedParams.success) {
+      res
+        .status(StatusCodes.BAD_REQUEST)
+        .json({ error: "Invalid language id" });
+      return;
+    }
+
+    const languageId = parsedParams.data.id;
+
+    const language = await languagesRepository.getLanguageById(languageId);
 
     // Check if language exists
     if (!language) {

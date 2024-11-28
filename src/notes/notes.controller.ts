@@ -20,6 +20,13 @@ const ParamsIdSchema = z.object({
   id: z.string().uuid(),
 });
 
+const QueryParamsSchema = z.object({
+  sortBy: z.string().optional().default("createdAt"),
+  order: z.string().optional().default("asc"),
+  page: z.string().optional().default("1"),
+  limit: z.string().optional().default("10"),
+});
+
 // Get all notes
 // GET: /api/notes
 router.route("/").get(
@@ -154,9 +161,42 @@ router.route("/language/:id").get(
       return;
     }
 
-    const notes = await notesRepository.getNotesByLanguageId(languageId);
+    const parsedQuery = QueryParamsSchema.safeParse(req.query);
 
-    res.status(StatusCodes.OK).json(notes);
+    if (!parsedQuery.success) {
+      res
+        .status(StatusCodes.BAD_REQUEST)
+        .json({ error: "Invalid query params" });
+      return;
+    }
+
+    const { sortBy, order, page, limit } = parsedQuery.data;
+
+    if (Number(page) < 1 || Number(limit) < 1) {
+      res
+        .status(StatusCodes.BAD_REQUEST)
+        .json({ error: "Invalid query params" });
+    }
+
+    const [notes, total] = await notesRepository.getNotesByLanguageId(
+      languageId,
+      Number(limit),
+      Number(page),
+      sortBy,
+      order,
+    );
+
+    const totalPages = Math.ceil(Number(total) / Number(limit));
+
+    if (Number(page) > totalPages) {
+      res.status(StatusCodes.NOT_FOUND).json({ error: "Notes not found" });
+      return;
+    }
+
+    res.status(StatusCodes.OK).json({
+      notes,
+      meta: { total, totalPages },
+    });
   }),
 );
 

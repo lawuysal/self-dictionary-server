@@ -12,14 +12,17 @@ export class AppError extends Error {
 }
 
 export const globalErrorHandler = (
-  err: Error | AppError | ZodError,
+  err:
+    | Error
+    | AppError
+    | ZodError
+    | jwt.JsonWebTokenError
+    | jwt.TokenExpiredError,
   req: Request,
   res: Response,
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   next: NextFunction,
 ) => {
-  console.error(err);
-
   if (err instanceof ZodError) {
     res.status(StatusCodes.BAD_REQUEST).json({ error: err.errors[0].message });
     return;

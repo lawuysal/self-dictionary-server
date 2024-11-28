@@ -29,12 +29,28 @@ async function getNotesByUserId(userId: string) {
   return notes;
 }
 
-async function getNotesByLanguageId(languageId: string) {
-  const notes = await prisma.note.findMany({
-    where: { languageId },
-  });
+async function getNotesByLanguageId(
+  languageId: string,
+  limit: number,
+  page: number,
+  sortBy: string,
+  order: string,
+) {
+  const skip = (page - 1) * limit;
 
-  return notes;
+  const [notes, total] = await prisma.$transaction([
+    prisma.note.findMany({
+      where: { languageId },
+      skip,
+      take: limit,
+      orderBy: { createdAt: order === "asc" ? "asc" : "desc" },
+    }),
+    prisma.note.count({
+      where: { languageId },
+    }),
+  ]);
+
+  return [notes, total];
 }
 
 async function createNote(noteData: CreateNoteRequestDto, languageId: string) {

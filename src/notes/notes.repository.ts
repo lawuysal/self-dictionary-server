@@ -43,7 +43,7 @@ async function getNotesByLanguageId(
       where: { languageId },
       skip,
       take: limit,
-      orderBy: { createdAt: order === "asc" ? "asc" : "desc" },
+      orderBy: { [sortBy]: order === "asc" ? "asc" : "desc" },
     }),
     prisma.note.count({
       where: { languageId },

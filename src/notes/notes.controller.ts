@@ -25,6 +25,7 @@ const QueryParamsSchema = z.object({
   order: z.string().optional().default("asc"),
   page: z.string().optional().default("1"),
   limit: z.string().optional().default("10"),
+  search: z.string().optional().default(""),
 });
 
 // Get all notes
@@ -170,7 +171,7 @@ router.route("/language/:id").get(
       return;
     }
 
-    const { sortBy, order, page, limit } = parsedQuery.data;
+    const { sortBy, order, page, limit, search } = parsedQuery.data;
 
     if (Number(page) < 1 || Number(limit) < 1) {
       res
@@ -184,11 +185,12 @@ router.route("/language/:id").get(
       Number(page),
       sortBy,
       order,
+      search,
     );
 
     const totalPages = Math.ceil(Number(total) / Number(limit));
 
-    if (Number(page) > totalPages) {
+    if (Number(page) > totalPages && totalPages !== 0) {
       res.status(StatusCodes.NOT_FOUND).json({ error: "Notes not found" });
       return;
     }

@@ -35,18 +35,31 @@ async function getNotesByLanguageId(
   page: number,
   sortBy: string,
   order: string,
+  search: string,
 ) {
   const skip = (page - 1) * limit;
 
   const [notes, total] = await prisma.$transaction([
     prisma.note.findMany({
-      where: { languageId },
+      where: {
+        languageId,
+        name: {
+          contains: search,
+          mode: "insensitive",
+        },
+      },
       skip,
       take: limit,
       orderBy: { [sortBy]: order === "asc" ? "asc" : "desc" },
     }),
     prisma.note.count({
-      where: { languageId },
+      where: {
+        languageId,
+        name: {
+          contains: search,
+          mode: "insensitive",
+        },
+      },
     }),
   ]);
 

@@ -1,0 +1,2 @@
+GET http://localhost:3005/api/profiles/user/6f5bdffd-2677-497d-90df-19b067607dff
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2ZjViZGZmZC0yNjc3LTQ5N2QtOTBkZi0xOWIwNjc2MDdkZmYiLCJpYXQiOjE3Mjg4NTcxNTAsImV4cCI6MTcyODk0MzU1MH0.gbZuw1vm76JHtDNlmtOAB4u71pcaiZBsWNgXK2RpVCk

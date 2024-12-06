@@ -12,7 +12,7 @@ import {
 } from "./dtos/createNoteRequest.dto";
 import { ParamsDictionary } from "express-serve-static-core";
 import { UpdateLanguageRequestDto } from "../languages/dtos/updateLanguageRequest.dto";
-import { UpdateNoteRequesSchema } from "./dtos/updateNoteRequest.dto";
+import { UpdateNoteRequestSchema } from "./dtos/updateNoteRequest.dto";
 
 const router = Router();
 
@@ -117,9 +117,43 @@ router.route("/user/:id").get(
       return;
     }
 
-    const notes = await notesRepository.getNotesByUserId(ownerId);
+    const parsedQuery = QueryParamsSchema.safeParse(req.query);
 
-    res.status(StatusCodes.OK).json(notes);
+    if (!parsedQuery.success) {
+      res
+        .status(StatusCodes.BAD_REQUEST)
+        .json({ error: "Invalid query params" });
+      return;
+    }
+
+    const { sortBy, order, page, limit, search } = parsedQuery.data;
+
+    if (Number(page) < 1 || Number(limit) < 1) {
+      res
+        .status(StatusCodes.BAD_REQUEST)
+        .json({ error: "Invalid query params" });
+    }
+
+    const [notes, total, totalCount] = await notesRepository.getNotesByUserId(
+      ownerId,
+      Number(limit),
+      Number(page),
+      sortBy,
+      order,
+      search,
+    );
+
+    const totalPages = Math.ceil(Number(totalCount) / Number(limit));
+
+    if (Number(page) > totalPages && totalPages !== 0) {
+      res.status(StatusCodes.NOT_FOUND).json({ error: "Notes not found" });
+      return;
+    }
+
+    res.status(StatusCodes.OK).json({
+      notes,
+      meta: { total, totalPages, totalCount },
+    });
   }),
 );
 
@@ -179,16 +213,17 @@ router.route("/language/:id").get(
         .json({ error: "Invalid query params" });
     }
 
-    const [notes, total] = await notesRepository.getNotesByLanguageId(
-      languageId,
-      Number(limit),
-      Number(page),
-      sortBy,
-      order,
-      search,
-    );
+    const [notes, total, totalCount] =
+      await notesRepository.getNotesByLanguageId(
+        languageId,
+        Number(limit),
+        Number(page),
+        sortBy,
+        order,
+        search,
+      );
 
-    const totalPages = Math.ceil(Number(total) / Number(limit));
+    const totalPages = Math.ceil(Number(totalCount) / Number(limit));
 
     if (Number(page) > totalPages && totalPages !== 0) {
       res.status(StatusCodes.NOT_FOUND).json({ error: "Notes not found" });
@@ -197,7 +232,7 @@ router.route("/language/:id").get(
 
     res.status(StatusCodes.OK).json({
       notes,
-      meta: { total, totalPages },
+      meta: { total, totalPages, totalCount },
     });
   }),
 );
@@ -306,7 +341,10 @@ router.route("/:id").put(
         return;
       }
 
-      const parsedBody = UpdateNoteRequesSchema.safeParse(req.body);
+      const parsedBody = UpdateNoteRequestSchema.safeParse(req.body);
+
+      console.log(req.body);
+      console.log(parsedBody.error);
 
       // Check if body is valid
       if (!parsedBody.success) {
@@ -371,6 +409,121 @@ router.route("/:id").delete(
     await notesRepository.deleteNoteById(noteId);
 
     res.status(StatusCodes.NO_CONTENT).send();
+  }),
+);
+
+// Get random quiz notes
+// POST: /api/notes/quiz/language/:id
+router.route("/quiz/language/:id").post(
+  authGuard(Roles.USER),
+  asyncHandler(async (req, res) => {
+    const userId = req.userId;
+
+    // Check if user is authenticated
+    if (!userId) {
+      res.status(StatusCodes.UNAUTHORIZED).json({ error: "Unauthorized" });
+      return;
+    }
+
+    const parsedParams = ParamsIdSchema.safeParse(req.params);
+
+    // Check if id is valid
+    if (!parsedParams.success) {
+      res
+        .status(StatusCodes.BAD_REQUEST)
+        .json({ error: "Invalid language id" });
+      return;
+    }
+
+    const languageId = parsedParams.data.id;
+
+    const language = await languagesRepository.getLanguageById(languageId);
+
+    // Check if language exists
+    if (!language) {
+      res.status(StatusCodes.NOT_FOUND).json({ error: "Language not found" });
+      return;
+    }
+
+    // Check if user is admin or owner of the language
+    if (!req.isAdmin && language.ownerId !== userId) {
+      res.status(StatusCodes.FORBIDDEN).json({ error: "Forbidden" });
+      return;
+    }
+
+    const quizQuestions =
+      await notesRepository.getRandomQuizQuestions(languageId);
+
+    res.status(StatusCodes.OK).json({
+      quizQuestions,
+    });
+  }),
+);
+
+// Get quiz question answer
+// POST: /api/notes/quiz/question/answer/:id
+router.route("/quiz/question/answer/:id").post(
+  authGuard(Roles.USER),
+  asyncHandler(async (req, res) => {
+    const userId = req.userId;
+
+    // Check if user is authenticated
+    if (!userId) {
+      res.status(StatusCodes.UNAUTHORIZED).json({ error: "Unauthorized" });
+      return;
+    }
+
+    const parsedParams = ParamsIdSchema.safeParse(req.params);
+
+    // Check if id is valid
+    if (!parsedParams.success) {
+      res.status(StatusCodes.BAD_REQUEST).json({ error: "Invalid note id" });
+      return;
+    }
+
+    const noteId = parsedParams.data.id;
+
+    const note = await notesRepository.getNoteById(noteId);
+
+    // Check if note exists
+    if (!note) {
+      res.status(StatusCodes.NOT_FOUND).json({ error: "Note not found" });
+      return;
+    }
+
+    const language = await languagesRepository.getLanguageById(note.languageId);
+
+    // Check if language exists
+    if (!language) {
+      res.status(StatusCodes.NOT_FOUND).json({ error: "Language not found" });
+      return;
+    }
+
+    // Check if user is admin or owner of the note
+    if (!req.isAdmin && language.ownerId !== userId) {
+      res.status(StatusCodes.FORBIDDEN).json({ error: "Forbidden" });
+      return;
+    }
+
+    const answerResponse = {
+      answer: note.translation,
+      isCorrect: false,
+    };
+
+    if (req.body.answer === note.translation) {
+      answerResponse.isCorrect = true;
+      if (note.intensity !== 100 && note.intensity < 100) {
+        await notesRepository.increaseNoteIntensity(noteId, 1);
+      }
+    }
+
+    if (req.body.answer !== note.translation) {
+      if (note.intensity !== 0 && note.intensity > 0) {
+        await notesRepository.decreaseNoteIntensity(noteId, 1);
+      }
+    }
+
+    res.status(StatusCodes.OK).json(answerResponse);
   }),
 );
 

@@ -43,6 +43,8 @@ export const globalErrorHandler = (
     return;
   }
 
+  console.log(err);
+
   res
     .status(StatusCodes.INTERNAL_SERVER_ERROR)
     .json({ error: "Something went wrong" });

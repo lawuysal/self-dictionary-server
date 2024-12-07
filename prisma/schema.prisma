@@ -26,11 +26,13 @@ model User {
   preferences Preference?
 
   // One to many
-  languages Language[]
+  languages   Language[]
+  socialPosts SocialPost[]
 
   // Many to many
-  roles      RolesOnUsers[]
-  savedNotes NotesSavedOnUsers[]
+  roles                       RolesOnUsers[]
+  savedNotes                  NotesSavedOnUsers[]
+  positiveActionedSocialPosts PositiveActionOnSocialPost[]
 }
 
 model Role {
@@ -125,4 +127,27 @@ model Preference {
 
   owner   User   @relation(fields: [ownerId], references: [id])
   ownerId String @unique @db.Uuid
+}
+
+model SocialPost {
+  id      String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  content String
+
+  createdAt DateTime @default(now())
+
+  owner                      User                         @relation(fields: [ownerId], references: [id])
+  ownerId                    String                       @db.Uuid
+  PositiveActionOnSocialPost PositiveActionOnSocialPost[]
+}
+
+model PositiveActionOnSocialPost {
+  postId String @db.Uuid
+  userId String @db.Uuid
+
+  positiveActionAt DateTime @default(now())
+
+  socialPost SocialPost @relation(fields: [postId], references: [id])
+  user       User       @relation(fields: [userId], references: [id])
+
+  @@id([postId, userId])
 }

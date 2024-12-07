@@ -9,6 +9,7 @@ import { globalErrorHandler } from "./middlewares/globalErrorMiddleware";
 import { profilesController } from "./profiles/profiles.controller";
 import { preferencesController } from "./preferences/preferences.controller";
 import { notesController } from "./notes/notes.controller";
+import path from "path";
 
 const app = express();
 
@@ -26,6 +27,8 @@ app.use(
     optionsSuccessStatus: 200,
   }),
 );
+
+app.use("/public", express.static(path.join(__dirname, "../public")));
 
 app.use("/api/auth", authController);
 app.use("/api/roles", rolesController);

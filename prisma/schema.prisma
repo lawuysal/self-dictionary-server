@@ -33,8 +33,8 @@ model User {
   roles                       RolesOnUsers[]
   savedNotes                  NotesSavedOnUsers[]
   positiveActionedSocialPosts PositiveActionOnSocialPosts[]
-  followedUsers               FollowedUserOnUsers[]         @relation("FollowedUser")
-  followerUsers               FollowedUserOnUsers[]         @relation("FollowerUser")
+  followedBy                  FollowsOnUsers[]              @relation("followedBy")
+  following                   FollowsOnUsers[]              @relation("following")
 }
 
 model Role {
@@ -155,14 +155,14 @@ model PositiveActionOnSocialPosts {
   @@id([postId, userId])
 }
 
-model FollowedUserOnUsers {
-  followerUserId String @db.Uuid
-  followedUserId String @db.Uuid
+model FollowsOnUsers {
+  followedById String @db.Uuid
+  followingId  String @db.Uuid
 
   followedAt DateTime @default(now())
 
-  follower User @relation(name: "FollowerUser", fields: [followerUserId], references: [id])
-  followed User @relation(name: "FollowedUser", fields: [followedUserId], references: [id])
+  followedBy User @relation("followedBy", fields: [followedById], references: [id])
+  following  User @relation("following", fields: [followingId], references: [id])
 
-  @@id([followerUserId, followedUserId])
+  @@id([followedById, followingId])
 }

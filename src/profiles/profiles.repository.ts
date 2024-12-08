@@ -46,7 +46,21 @@ async function getProfileByUserId(userId: string) {
 }
 
 async function getProfileByUsername(username: string) {
-  return await prisma.profile.findUnique({ where: { username } });
+  return await prisma.profile.findUnique({
+    where: { username },
+    include: {
+      owner: {
+        select: {
+          _count: {
+            select: {
+              following: true,
+              followedBy: true,
+            },
+          },
+        },
+      },
+    },
+  });
 }
 
 /**

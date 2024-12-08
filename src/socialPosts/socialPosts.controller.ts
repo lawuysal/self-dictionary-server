@@ -138,6 +138,11 @@ router.route("/add-positive-action").post(
         req.body,
       );
 
+      if (!req.isAdmin && userId !== parsedBody.userId) {
+        res.status(StatusCodes.UNAUTHORIZED).json({ error: "Unauthorized" });
+        return;
+      }
+
       const positiveAction =
         await socialPostsRepository.getPositiveActionById(parsedBody);
 
@@ -181,6 +186,11 @@ router.route("/remove-positive-action").post(
       const parsedBody = CreatePositiveActionToPostRequestSchema.parse(
         req.body,
       );
+
+      if (!req.isAdmin && userId !== parsedBody.userId) {
+        res.status(StatusCodes.UNAUTHORIZED).json({ error: "Unauthorized" });
+        return;
+      }
 
       const positiveAction =
         await socialPostsRepository.getPositiveActionById(parsedBody);

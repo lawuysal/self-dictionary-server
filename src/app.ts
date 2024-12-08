@@ -11,6 +11,7 @@ import { preferencesController } from "./preferences/preferences.controller";
 import { notesController } from "./notes/notes.controller";
 import path from "path";
 import { socialPostsController } from "./socialPosts/socialPosts.controller";
+import { usersController } from "./users/users.controller";
 
 const app = express();
 
@@ -31,6 +32,7 @@ app.use(
 
 app.use("/public", express.static(path.join(__dirname, "../public")));
 
+app.use("/api/users", usersController);
 app.use("/api/auth", authController);
 app.use("/api/roles", rolesController);
 app.use("/api/profiles", profilesController);

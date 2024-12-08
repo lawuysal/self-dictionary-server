@@ -26,6 +26,10 @@ const ParamsIdSchema = z.object({
   id: z.string(),
 });
 
+const ParamsUsernameSchema = z.object({
+  username: z.string().min(2).max(30).toLowerCase(),
+});
+
 // Get all profiles
 // GET: /api/profiles
 router.route("/").get(
@@ -73,6 +77,49 @@ router.route("/:id").get(
       res.status(StatusCodes.FORBIDDEN).json({ error: "Forbidden" });
       return;
     }
+
+    res.status(StatusCodes.OK).json(profile);
+  }),
+);
+
+// Get profile by username
+// GET: /api/profiles/username/:username
+router.route("/username/:username").get(
+  authGuard(Roles.USER),
+  asyncHandler(async (req, res) => {
+    const userId = req.userId;
+
+    // Check if user is authenticated
+    if (!userId) {
+      res.status(StatusCodes.UNAUTHORIZED).json({ error: "Unauthorized" });
+      return;
+    }
+
+    const parsedParams = ParamsUsernameSchema.safeParse(req.params);
+
+    // Check if params are in the right type.
+    if (!parsedParams.success) {
+      res
+        .status(StatusCodes.BAD_REQUEST)
+        .json({ error: "Invalid username", errorMessage: parsedParams.error });
+      return;
+    }
+
+    const username = parsedParams.data.username;
+
+    const profile = await profilesRepository.getProfileByUsername(username);
+
+    // Check if profile exists
+    if (!profile) {
+      res.status(StatusCodes.NOT_FOUND).json({ error: "Profile not found" });
+      return;
+    }
+
+    // // Check if user is admin or owner of the profile
+    // if (!req.isAdmin && profile.ownerId !== userId) {
+    //   res.status(StatusCodes.FORBIDDEN).json({ error: "Forbidden" });
+    //   return;
+    // }
 
     res.status(StatusCodes.OK).json(profile);
   }),

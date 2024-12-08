@@ -32,7 +32,9 @@ model User {
   // Many to many
   roles                       RolesOnUsers[]
   savedNotes                  NotesSavedOnUsers[]
-  positiveActionedSocialPosts PositiveActionOnSocialPost[]
+  positiveActionedSocialPosts PositiveActionOnSocialPosts[]
+  followedUsers               FollowedUserOnUsers[]         @relation("FollowedUser")
+  followerUsers               FollowedUserOnUsers[]         @relation("FollowerUser")
 }
 
 model Role {
@@ -112,6 +114,7 @@ model Profile {
   photoUrl  String?
   bio       String?
 
+  createdAt DateTime  @default(now())
   updatedAt DateTime? @updatedAt
 
   owner   User   @relation(fields: [ownerId], references: [id])
@@ -135,12 +138,12 @@ model SocialPost {
 
   createdAt DateTime @default(now())
 
-  owner                      User                         @relation(fields: [ownerId], references: [id])
-  ownerId                    String                       @db.Uuid
-  PositiveActionOnSocialPost PositiveActionOnSocialPost[]
+  owner                       User                          @relation(fields: [ownerId], references: [id])
+  ownerId                     String                        @db.Uuid
+  positiveActionOnSocialPosts PositiveActionOnSocialPosts[]
 }
 
-model PositiveActionOnSocialPost {
+model PositiveActionOnSocialPosts {
   postId String @db.Uuid
   userId String @db.Uuid
 
@@ -150,4 +153,16 @@ model PositiveActionOnSocialPost {
   user       User       @relation(fields: [userId], references: [id])
 
   @@id([postId, userId])
+}
+
+model FollowedUserOnUsers {
+  followerUserId String @db.Uuid
+  followedUserId String @db.Uuid
+
+  followedAt DateTime @default(now())
+
+  follower User @relation(name: "FollowerUser", fields: [followerUserId], references: [id])
+  followed User @relation(name: "FollowedUser", fields: [followedUserId], references: [id])
+
+  @@id([followerUserId, followedUserId])
 }

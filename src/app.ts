@@ -10,6 +10,7 @@ import { profilesController } from "./profiles/profiles.controller";
 import { preferencesController } from "./preferences/preferences.controller";
 import { notesController } from "./notes/notes.controller";
 import path from "path";
+import { socialPostsController } from "./socialPosts/socialPosts.controller";
 
 const app = express();
 
@@ -36,6 +37,7 @@ app.use("/api/profiles", profilesController);
 app.use("/api/preferences", preferencesController);
 app.use("/api/languages", languagesController);
 app.use("/api/notes", notesController);
+app.use("/api/social-posts", socialPostsController);
 
 app.use(globalErrorHandler);
 

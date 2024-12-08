@@ -45,6 +45,10 @@ async function getProfileByUserId(userId: string) {
   return await prisma.profile.findUnique({ where: { ownerId: userId } });
 }
 
+async function getProfileByUsername(username: string) {
+  return await prisma.profile.findUnique({ where: { username } });
+}
+
 /**
  * Creates a new profile.
  * @async
@@ -120,6 +124,7 @@ export const profilesRepository = {
   getProfiles,
   getProfileById,
   getProfileByUserId,
+  getProfileByUsername,
   createProfile,
   updateProfile,
 };

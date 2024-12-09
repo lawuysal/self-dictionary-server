@@ -35,6 +35,7 @@ async function getSocialPosts() {
                   firstName: true,
                   lastName: true,
                   username: true,
+                  photoUrl: true,
                 },
               },
             },
@@ -52,19 +53,20 @@ async function getSocialPosts() {
         createdAt: socialPost.createdAt.toISOString(),
         owner: {
           ownerId: socialPost.ownerId,
-          firstName: socialPost.owner.profile?.firstName as string,
-          lastName: socialPost.owner.profile?.lastName as string,
-          photoUrl: socialPost.owner.profile?.photoUrl as string,
-          username: socialPost.owner.profile?.username as string,
+          firstName: socialPost.owner.profile?.firstName || "",
+          lastName: socialPost.owner.profile?.lastName || "",
+          photoUrl: socialPost.owner.profile?.photoUrl || "",
+          username: socialPost.owner.profile?.username || "",
         },
         positiveActionCount: socialPost._count.positiveActionOnSocialPosts,
         positiveActionsBy: socialPost.positiveActionOnSocialPosts.map(
           (positiveAction) => {
             return {
               userId: positiveAction.user.id,
-              userFirstName: positiveAction.user.profile?.firstName as string,
-              userLastName: positiveAction.user.profile?.lastName as string,
-              userUsername: positiveAction.user.profile?.username as string,
+              userFirstName: positiveAction.user.profile?.firstName || "",
+              userLastName: positiveAction.user.profile?.lastName || "",
+              userUsername: positiveAction.user.profile?.username || "",
+              userPhotoUrl: positiveAction.user.profile?.photoUrl || "",
               positiveActionAt: positiveAction.positiveActionAt.toISOString(),
             };
           },
@@ -108,6 +110,7 @@ async function getSocialPostById(socialPostId: string) {
                   firstName: true,
                   lastName: true,
                   username: true,
+                  photoUrl: true,
                 },
               },
             },
@@ -127,19 +130,20 @@ async function getSocialPostById(socialPostId: string) {
     createdAt: socialPost.createdAt.toISOString(),
     owner: {
       ownerId: socialPost.ownerId,
-      firstName: socialPost.owner.profile?.firstName as string,
-      lastName: socialPost.owner.profile?.lastName as string,
-      photoUrl: socialPost.owner.profile?.photoUrl as string,
-      username: socialPost.owner.profile?.username as string,
+      firstName: socialPost.owner.profile?.firstName || "",
+      lastName: socialPost.owner.profile?.lastName || "",
+      photoUrl: socialPost.owner.profile?.photoUrl || "",
+      username: socialPost.owner.profile?.username || "",
     },
     positiveActionCount: socialPost._count.positiveActionOnSocialPosts,
     positiveActionsBy: socialPost.positiveActionOnSocialPosts.map(
       (positiveAction) => {
         return {
           userId: positiveAction.user.id,
-          userFirstName: positiveAction.user.profile?.firstName as string,
-          userLastName: positiveAction.user.profile?.lastName as string,
-          userUsername: positiveAction.user.profile?.username as string,
+          userFirstName: positiveAction.user.profile?.firstName || "",
+          userLastName: positiveAction.user.profile?.lastName || "",
+          userUsername: positiveAction.user.profile?.username || "",
+          userPhotoUrl: positiveAction.user.profile?.photoUrl || "",
           positiveActionAt: positiveAction.positiveActionAt.toISOString(),
         };
       },

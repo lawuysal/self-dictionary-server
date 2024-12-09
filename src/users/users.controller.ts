@@ -61,7 +61,13 @@ router.route("/add-follow").post(
 
       await usersRepository.createFollowOnUser(parsedBody);
 
-      res.status(StatusCodes.CREATED).json({ followed: true });
+      res
+        .status(StatusCodes.CREATED)
+        .json({
+          followed: true,
+          followedUserId: parsedBody.followingId,
+          followerUserId: parsedBody.followedById,
+        });
     },
   ),
 );
@@ -109,7 +115,11 @@ router.route("/remove-follow").post(
 
       await usersRepository.deleteFollowOnUser(parsedBody);
 
-      res.status(StatusCodes.NO_CONTENT).json({ unfollowed: true });
+      res.status(StatusCodes.OK).json({
+        unfollowed: true,
+        unfollowedUserId: parsedBody.followingId,
+        unfollowerUserId: parsedBody.followedById,
+      });
     },
   ),
 );

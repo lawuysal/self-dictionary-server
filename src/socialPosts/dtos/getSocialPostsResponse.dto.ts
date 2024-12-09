@@ -15,6 +15,7 @@ export type GetSocialPostResponseDto = {
     userFirstName: string;
     userLastName: string;
     userUsername: string;
+    userPhotoUrl: string;
     positiveActionAt: string;
   }>;
 };

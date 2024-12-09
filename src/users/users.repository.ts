@@ -1,6 +1,8 @@
 import { prisma } from "@/prisma/client";
 import { CreateFollowOnUserRequestDto } from "./dtos/createFollowOnUserRequest.dto";
 import { DeleteFollowOnUserRequestDto } from "./dtos/deleteFollowOnUserRequest.dto";
+import { GetFollowedUsersResponseDto } from "./dtos/getFollowedUsersResponse.dto";
+import { GetFollowersResponseDto } from "./dtos/getFollowersResponse.dto";
 
 async function getUserByUserId(userId: string) {
   const user = await prisma.user.findUnique({
@@ -58,7 +60,6 @@ async function getFollowersByUserId(userId: string) {
     include: {
       followedBy: {
         select: {
-          _count: { select: { followedBy: true } },
           id: true,
           profile: {
             select: {
@@ -73,7 +74,17 @@ async function getFollowersByUserId(userId: string) {
     },
   });
 
-  return followers;
+  const followersData: GetFollowersResponseDto = followers.map((follower) => {
+    return {
+      id: follower.followedBy.id,
+      firstName: follower.followedBy.profile?.firstName || "",
+      lastName: follower.followedBy.profile?.lastName || "",
+      username: follower.followedBy.profile?.username || "",
+      photoUrl: follower.followedBy.profile?.photoUrl || "",
+    };
+  });
+
+  return followersData;
 }
 
 async function getFollowedUsersByUserId(userId: string) {
@@ -85,7 +96,6 @@ async function getFollowedUsersByUserId(userId: string) {
     include: {
       following: {
         select: {
-          _count: { select: { following: true } },
           id: true,
           profile: {
             select: {
@@ -100,7 +110,19 @@ async function getFollowedUsersByUserId(userId: string) {
     },
   });
 
-  return followedUsers;
+  const followedUsersData: GetFollowedUsersResponseDto = followedUsers.map(
+    (followedUser) => {
+      return {
+        id: followedUser.following.id,
+        firstName: followedUser.following.profile?.firstName || "",
+        lastName: followedUser.following.profile?.lastName || "",
+        username: followedUser.following.profile?.username || "",
+        photoUrl: followedUser.following.profile?.photoUrl || "",
+      };
+    },
+  );
+
+  return followedUsersData;
 }
 
 export const usersRepository = {

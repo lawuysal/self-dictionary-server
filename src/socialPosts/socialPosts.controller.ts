@@ -14,6 +14,7 @@ import {
   CreatePositiveActionToPostRequestDto,
   CreatePositiveActionToPostRequestSchema,
 } from "./dtos/createPositiveActionToPostRequest.dto";
+import { PostType } from "./enum/postType";
 
 const router = Router();
 
@@ -26,13 +27,41 @@ const ParamsIdSchema = z.object({
 router.route("/").get(
   authGuard(Roles.USER),
   asyncHandler(async (req, res) => {
-    const socialPosts = await socialPostsRepository.getSocialPosts();
+    const userId = req.userId;
+
+    if (!userId) {
+      res.status(StatusCodes.UNAUTHORIZED).json({ error: "Unauthorized" });
+      return;
+    }
+
+    let socialPosts;
+
+    if (PostType.POSITIVE_ACTIONED_POSTS === req.query.type) {
+      socialPosts = await socialPostsRepository.getPositiveActionedSocialPosts(
+        userId,
+        Number(req.query.page),
+      );
+    } else if (PostType.MY_POSTS === req.query.type) {
+      socialPosts = await socialPostsRepository.getMySocialPosts(
+        userId,
+        Number(req.query.page),
+      );
+    } else if (PostType.MY_FOLLOWINGS === req.query.type) {
+      socialPosts = await socialPostsRepository.getMyFollowedUsersSocialPosts(
+        userId,
+        Number(req.query.page),
+      );
+    } else {
+      socialPosts = await socialPostsRepository.getLatestSocialPosts(
+        Number(req.query.page),
+      );
+    }
 
     res.status(StatusCodes.OK).json(socialPosts);
   }),
 );
 
-// Get social post bt id
+// Get social post by id
 // GET: /api/social-posts/:id
 router.route("/:id").get(
   authGuard(Roles.USER),

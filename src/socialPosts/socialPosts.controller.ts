@@ -35,6 +35,7 @@ router.route("/").get(
     }
 
     let socialPosts;
+    const username = req.query.username as string;
 
     if (PostType.POSITIVE_ACTIONED_POSTS === req.query.type) {
       socialPosts = await socialPostsRepository.getPositiveActionedSocialPosts(
@@ -49,6 +50,11 @@ router.route("/").get(
     } else if (PostType.MY_FOLLOWINGS === req.query.type) {
       socialPosts = await socialPostsRepository.getMyFollowedUsersSocialPosts(
         userId,
+        Number(req.query.page),
+      );
+    } else if (PostType.USERS_POSTS === req.query.type) {
+      socialPosts = await socialPostsRepository.getUserSocialPostsByUsername(
+        username,
         Number(req.query.page),
       );
     } else {
@@ -139,6 +145,54 @@ router.route("/").post(
       res.status(StatusCodes.CREATED).json(socialPost);
     },
   ),
+);
+
+// Delete social post by id
+// DELETE: /api/social-posts/:id
+router.route("/:id").delete(
+  authGuard(Roles.USER),
+  asyncHandler(async (req, res) => {
+    const userId = req.userId;
+
+    // Check if user is authenticated
+    if (!userId) {
+      res.status(StatusCodes.UNAUTHORIZED).json({ error: "Unauthorized" });
+      return;
+    }
+
+    const parsedParams = ParamsIdSchema.safeParse(req.params);
+
+    // Check if params are in the right type
+    if (!parsedParams.success) {
+      res
+        .status(StatusCodes.BAD_REQUEST)
+        .json({ error: "Invalid social post id" });
+      return;
+    }
+
+    const socialPostId = parsedParams.data.id;
+
+    const socialPost =
+      await socialPostsRepository.getSocialPostById(socialPostId);
+
+    // Check if language exists
+    if (!socialPost) {
+      res
+        .status(StatusCodes.NOT_FOUND)
+        .json({ error: "Social post not found" });
+      return;
+    }
+
+    // Check if user is admin or owner of the language
+    if (!req.isAdmin && socialPost.owner.ownerId !== userId) {
+      res.status(StatusCodes.FORBIDDEN).json({ error: "Forbidden" });
+      return;
+    }
+
+    await socialPostsRepository.deleteSocialPostById(socialPostId);
+
+    res.status(StatusCodes.OK).json({ socialPost });
+  }),
 );
 
 // Add positive action to a post

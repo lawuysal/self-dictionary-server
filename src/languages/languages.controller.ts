@@ -247,4 +247,50 @@ router.route("/:id").delete(
   }),
 );
 
+// Get language note counts
+// GET: /api/languages/note-counts/:id/
+router.route("/note-counts/:id").get(
+  authGuard(Roles.USER),
+  asyncHandler(async (req, res) => {
+    const userId = req.userId;
+
+    // Check if params are in the right type.
+    const parsedParams = ParamsIdSchema.safeParse(req.params);
+
+    if (!parsedParams.success) {
+      res
+        .status(StatusCodes.BAD_REQUEST)
+        .json({ error: "Invalid language id" });
+      return;
+    }
+
+    const languageId = parsedParams.data.id;
+
+    // Check if user is authenticated
+    if (!userId) {
+      res.status(StatusCodes.UNAUTHORIZED).json({ error: "Unauthorized" });
+      return;
+    }
+
+    const language = await languagesRepository.getLanguageById(languageId);
+
+    // Check if language exists
+    if (!language) {
+      res.status(StatusCodes.NOT_FOUND).json({ error: "Language not found" });
+      return;
+    }
+
+    // Check if user is admin or owner of the language
+    if (!req.isAdmin && language.ownerId !== userId) {
+      res.status(StatusCodes.FORBIDDEN).json({ error: "Forbidden" });
+      return;
+    }
+
+    const noteCounts =
+      await languagesRepository.getLanguageNoteCounts(languageId);
+
+    res.status(StatusCodes.OK).json(noteCounts);
+  }),
+);
+
 export const languagesController = router;

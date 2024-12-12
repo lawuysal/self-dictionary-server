@@ -4,6 +4,7 @@ import { UpdateLanguageRequestDto } from "./dtos/updateLanguageRequest.dto";
 import { Language } from "@prisma/client";
 import { StatusCodes } from "http-status-codes";
 import { AppError } from "../middlewares/globalErrorMiddleware";
+import { GetLanguageNoteCountsResponse } from "./dtos/getLanguageNoteCountsResponse.dto";
 
 /**
  * Gets all languages.
@@ -139,6 +140,68 @@ async function deleteLanguage(id: string): Promise<Language> {
   return deletedLanguage;
 }
 
+async function getLanguageNoteCounts(languageId: string) {
+  const totalCount = await prisma.note.count({
+    where: {
+      languageId: languageId,
+    },
+  });
+
+  const isPublicCount = await prisma.note.count({
+    where: {
+      languageId: languageId,
+      isPublic: true,
+    },
+  });
+
+  const lowIntensityCount = await prisma.note.count({
+    where: {
+      languageId: languageId,
+      intensity: { lte: 20 },
+    },
+  });
+
+  const lowMediumIntensityCount = await prisma.note.count({
+    where: {
+      languageId: languageId,
+      intensity: { lte: 40, gt: 20 },
+    },
+  });
+
+  const mediumIntensityCount = await prisma.note.count({
+    where: {
+      languageId: languageId,
+      intensity: { lte: 60, gt: 40 },
+    },
+  });
+
+  const mediumHighIntensityCount = await prisma.note.count({
+    where: {
+      languageId: languageId,
+      intensity: { lte: 80, gt: 60 },
+    },
+  });
+
+  const highIntensityCount = await prisma.note.count({
+    where: {
+      languageId: languageId,
+      intensity: { gt: 80 },
+    },
+  });
+
+  const noteCounts: GetLanguageNoteCountsResponse = {
+    totalCount,
+    isPublicCount,
+    lowIntensityCount,
+    lowMediumIntensityCount,
+    mediumIntensityCount,
+    mediumHighIntensityCount,
+    highIntensityCount,
+  };
+
+  return noteCounts;
+}
+
 export const languagesRepository = {
   getLanguages,
   getLanguageById,
@@ -146,4 +209,5 @@ export const languagesRepository = {
   createLanguage,
   updateLanguage,
   deleteLanguage,
+  getLanguageNoteCounts,
 };

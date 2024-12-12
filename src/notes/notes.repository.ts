@@ -176,6 +176,7 @@ async function getRandomQuizQuestions(
     }
 
     const note1 = await prisma.note.findFirstOrThrow({
+      orderBy: { id: "asc" },
       where: { languageId },
       skip: usedRandomInts[0],
     });
@@ -185,6 +186,7 @@ async function getRandomQuizQuestions(
     newQuestion.options = [note1.translation];
 
     const note2 = await prisma.note.findFirstOrThrow({
+      orderBy: { id: "asc" },
       where: { languageId },
       skip: usedRandomInts[1],
     });
@@ -192,6 +194,7 @@ async function getRandomQuizQuestions(
     newQuestion.options.push(note2.translation);
 
     const note3 = await prisma.note.findFirstOrThrow({
+      orderBy: { id: "asc" },
       where: { languageId },
       skip: usedRandomInts[2],
     });

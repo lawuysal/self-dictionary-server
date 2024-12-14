@@ -218,6 +218,85 @@ async function getRandomQuizQuestions(
   return selectedQuestions;
 }
 
+async function getRandomQuizQuestionsByIntensity(
+  languageId: string,
+  intensityType: "low" | "low-medium" | "medium" | "medium-high" | "high",
+  limit: number = 10,
+): Promise<QuizQuestion[]> {
+  let intensityRange: { lte?: number; gt?: number };
+
+  if (intensityType === "low") {
+    intensityRange = { lte: 20 };
+  } else if (intensityType === "low-medium") {
+    intensityRange = { lte: 40, gt: 20 };
+  } else if (intensityType === "medium") {
+    intensityRange = { lte: 60, gt: 40 };
+  } else if (intensityType === "medium-high") {
+    intensityRange = { lte: 80, gt: 60 };
+  } else {
+    intensityRange = { gt: 80 };
+  }
+
+  const notesCount = await prisma.note.count({
+    where: { languageId, intensity: intensityRange },
+  });
+
+  const selectedRandomInts: number[] = [];
+
+  while (selectedRandomInts.length < limit) {
+    const randomInt = getRandomInt(notesCount);
+    if (!selectedRandomInts.includes(randomInt)) {
+      selectedRandomInts.push(randomInt);
+    }
+  }
+
+  const selectedQuestions: QuizQuestion[] = [];
+
+  for (const randomInt of selectedRandomInts) {
+    const newQuestion: QuizQuestion = {} as QuizQuestion;
+    const usedRandomInts = [randomInt];
+
+    while (usedRandomInts.length < 3) {
+      const randomInt = getRandomInt(notesCount);
+      if (!usedRandomInts.includes(randomInt)) {
+        usedRandomInts.push(randomInt);
+      }
+    }
+
+    const note1 = await prisma.note.findFirstOrThrow({
+      orderBy: { id: "asc" },
+      where: { languageId, intensity: intensityRange },
+      skip: usedRandomInts[0],
+    });
+
+    newQuestion.noteId = note1.id;
+    newQuestion.noteName = note1.name;
+    newQuestion.options = [note1.translation];
+
+    const note2 = await prisma.note.findFirstOrThrow({
+      orderBy: { id: "asc" },
+      where: { languageId, intensity: intensityRange },
+      skip: usedRandomInts[1],
+    });
+
+    newQuestion.options.push(note2.translation);
+
+    const note3 = await prisma.note.findFirstOrThrow({
+      orderBy: { id: "asc" },
+      where: { languageId, intensity: intensityRange },
+      skip: usedRandomInts[2],
+    });
+
+    newQuestion.options.push(note3.translation);
+
+    newQuestion.options = shuffleArray(newQuestion.options);
+
+    selectedQuestions.push(newQuestion);
+  }
+
+  return selectedQuestions;
+}
+
 async function decreaseNoteIntensity(noteId: string, amount: number) {
   const note = await prisma.note.update({
     where: { id: noteId },
@@ -245,6 +324,7 @@ export const notesRepository = {
   updateNote,
   deleteNoteById,
   getRandomQuizQuestions,
+  getRandomQuizQuestionsByIntensity,
   decreaseNoteIntensity,
   increaseNoteIntensity,
 };

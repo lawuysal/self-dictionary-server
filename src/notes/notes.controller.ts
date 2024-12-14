@@ -451,8 +451,21 @@ router.route("/quiz/language/:id").post(
       return;
     }
 
-    const quizQuestions =
-      await notesRepository.getRandomQuizQuestions(languageId);
+    if (!req.body.type) {
+      res.status(StatusCodes.BAD_REQUEST).json({ error: "Invalid note type" });
+      return;
+    }
+
+    let quizQuestions;
+
+    if (req.body.type === "all") {
+      quizQuestions = await notesRepository.getRandomQuizQuestions(languageId);
+    } else {
+      quizQuestions = await notesRepository.getRandomQuizQuestionsByIntensity(
+        languageId,
+        req.body.type,
+      );
+    }
 
     res.status(StatusCodes.OK).json({
       quizQuestions,

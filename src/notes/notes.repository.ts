@@ -11,7 +11,16 @@ async function getNotes() {
 }
 
 async function getNoteById(id: string) {
-  const note = await prisma.note.findUnique({ where: { id } });
+  const note = await prisma.note.findUnique({
+    where: { id },
+    include: {
+      language: {
+        select: {
+          shadowLanguage: true,
+        },
+      },
+    },
+  });
   return note;
 }
 

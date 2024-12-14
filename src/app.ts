@@ -12,6 +12,8 @@ import { notesController } from "./notes/notes.controller";
 import path from "path";
 import { socialPostsController } from "./socialPosts/socialPosts.controller";
 import { usersController } from "./users/users.controller";
+import { dictionaryApiController } from "./dictionaryApi/dictionaryApi.controller";
+import { ttsController } from "./tts/tts.controller";
 
 const app = express();
 
@@ -40,6 +42,8 @@ app.use("/api/preferences", preferencesController);
 app.use("/api/languages", languagesController);
 app.use("/api/notes", notesController);
 app.use("/api/social-posts", socialPostsController);
+app.use("/api/dict-api", dictionaryApiController);
+app.use("/api/tts", ttsController);
 
 app.use(globalErrorHandler);
 

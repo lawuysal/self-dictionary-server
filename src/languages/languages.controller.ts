@@ -14,6 +14,7 @@ import {
   UpdateLanguageRequestSchema,
 } from "./dtos/updateLanguageRequest.dto";
 import { z } from "zod";
+import { SupportedTTSLanguagesEnum } from "../tts/enums/supportedTTSLanguages.enum";
 
 const router = Router();
 
@@ -290,6 +291,21 @@ router.route("/note-counts/:id").get(
       await languagesRepository.getLanguageNoteCounts(languageId);
 
     res.status(StatusCodes.OK).json(noteCounts);
+  }),
+);
+
+// Get all shadow languages
+// GET: /api/languages/shadow-languages/get
+router.route("/shadow-languages/get").get(
+  authGuard(Roles.USER),
+  asyncHandler(async (req, res) => {
+    const shadowLanguages = Object.values(SupportedTTSLanguagesEnum).map(
+      (language) => ({
+        language,
+        value: language,
+      }),
+    );
+    res.status(StatusCodes.OK).json(shadowLanguages);
   }),
 );
 

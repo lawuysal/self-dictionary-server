@@ -10,3 +10,7 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI1NDM0M
 // Get all languages by owner id
 GET http://localhost:3005/api/languages/user/5434245c-7718-4b05-babb-699c6bb920a6
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI1NDM0MjQ1Yy03NzE4LTRiMDUtYmFiYi02OTljNmJiOTIwYTYiLCJpYXQiOjE3Mjg2NjExMzIsImV4cCI6MTcyODc0NzUzMn0.-ObUluiVtGUUy-zSIcdeig_-9ijXm9F55epEaRim9jA
+
+// Get all shadow languages
+GET http://localhost:3005/api/languages/shadow-languages/get
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI1NDM0MjQ1Yy03NzE4LTRiMDUtYmFiYi02OTljNmJiOTIwYTYiLCJpYXQiOjE3MzQxMjA0MjcsImV4cCI6MTczNDIwNjgyN30.1KOru1Fdgw_ZeUAngHI_AhDqHEXoqgDcRxypNJD6FiM

@@ -13,6 +13,7 @@ export const CreateLanguageRequestSchema = z.object({
     )
     .max(200, "A language description must be at most 200 characters")
     .nullable(),
+  shadowLanguage: z.string().nullable(),
   ownerId: z.string().uuid(),
 });
 

@@ -28,6 +28,7 @@ model User {
   // One to many
   languages   Language[]
   socialPosts SocialPost[]
+  TTSFile     TTSFile[]
 
   // Many to many
   roles                       RolesOnUsers[]
@@ -61,9 +62,10 @@ model RolesOnUsers {
 }
 
 model Language {
-  id          String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  name        String  @unique
-  description String?
+  id             String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name           String
+  description    String?
+  shadowLanguage String?
 
   createdAt DateTime  @default(now())
   editedAt  DateTime? @updatedAt
@@ -165,4 +167,20 @@ model FollowsOnUsers {
   following  User @relation("following", fields: [followingId], references: [id])
 
   @@id([followedById, followingId])
+}
+
+model TTSFile {
+  id          String @id
+  createdById String @db.Uuid
+
+  text          String
+  languageCode  String
+  voiceName     String
+  audioEncoding String
+  speakingRate  Float
+
+  filePath String
+
+  createdAt DateTime @default(now())
+  createdBy User     @relation(fields: [createdById], references: [id])
 }

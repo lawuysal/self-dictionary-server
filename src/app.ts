@@ -14,6 +14,7 @@ import { socialPostsController } from "./socialPosts/socialPosts.controller";
 import { usersController } from "./users/users.controller";
 import { dictionaryApiController } from "./dictionaryApi/dictionaryApi.controller";
 import { ttsController } from "./tts/tts.controller";
+import { generativeAIController } from "./generativeAI/generativeAI.controller";
 
 const app = express();
 
@@ -44,6 +45,7 @@ app.use("/api/notes", notesController);
 app.use("/api/social-posts", socialPostsController);
 app.use("/api/dict-api", dictionaryApiController);
 app.use("/api/tts", ttsController);
+app.use("/api/generative-ai", generativeAIController);
 
 app.use(globalErrorHandler);
 

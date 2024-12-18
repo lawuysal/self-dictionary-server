@@ -4,6 +4,8 @@ import { UpdateNoteRequestDto } from "./dtos/updateNoteRequest.dto";
 import { getRandomInt } from "../utils/getRandomInt";
 import { shuffleArray } from "../utils/shuffleArray";
 import { QuizQuestion } from "./types/QuizQuestion";
+import { CreateNotePropertyRequestDto } from "./dtos/createNotePropertyRequest.dto";
+import { UpdateNotePropertyRequestDto } from "./dtos/updateNotePropertyRequest.dto";
 
 async function getNotes() {
   const notes = await prisma.note.findMany();
@@ -14,9 +16,11 @@ async function getNoteById(id: string) {
   const note = await prisma.note.findUnique({
     where: { id },
     include: {
+      properties: { orderBy: { createdAt: "asc" } },
       language: {
         select: {
           shadowLanguage: true,
+          ownerId: true,
         },
       },
     },
@@ -315,6 +319,59 @@ async function increaseNoteIntensity(noteId: string, amount: number) {
   return note;
 }
 
+async function getNotePropertyById(notePropertyId: string) {
+  const noteProperty = await prisma.noteProperty.findUnique({
+    where: { id: notePropertyId },
+    include: {
+      note: {
+        include: {
+          language: {
+            select: {
+              ownerId: true,
+            },
+          },
+        },
+      },
+    },
+  });
+
+  return noteProperty;
+}
+
+async function createNoteProperty(
+  notePropertyData: CreateNotePropertyRequestDto,
+) {
+  const noteProperty = await prisma.noteProperty.create({
+    data: { ...notePropertyData },
+  });
+
+  return noteProperty;
+}
+
+async function updateNoteProperty(
+  notePropertyData: UpdateNotePropertyRequestDto,
+) {
+  const noteProperty = await prisma.noteProperty.update({
+    where: { id: notePropertyData.notePropertyId },
+    data: {
+      id: notePropertyData.notePropertyId,
+      name: notePropertyData.name,
+      value: notePropertyData.value,
+      description: notePropertyData.description,
+    },
+  });
+
+  return noteProperty;
+}
+
+async function deleteNotePropertyById(notePropertyId: string) {
+  const noteProperty = await prisma.noteProperty.delete({
+    where: { id: notePropertyId },
+  });
+
+  return noteProperty;
+}
+
 export const notesRepository = {
   getNotes,
   getNoteById,
@@ -327,4 +384,8 @@ export const notesRepository = {
   getRandomQuizQuestionsByIntensity,
   decreaseNoteIntensity,
   increaseNoteIntensity,
+  getNotePropertyById,
+  createNoteProperty,
+  updateNoteProperty,
+  deleteNotePropertyById,
 };

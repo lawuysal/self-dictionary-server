@@ -82,7 +82,6 @@ model Note {
   name        String
   description String?
   translation String
-  properties  String?
   intensity   Int     @default(0)
   isPublic    Boolean @default(false)
 
@@ -92,8 +91,24 @@ model Note {
   language   Language @relation(fields: [languageId], references: [id])
   languageId String   @db.Uuid
 
+  // One to many
+  properties NoteProperty[]
+
   // Many to many
   savedBy NotesSavedOnUsers[]
+}
+
+model NoteProperty {
+  id          String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name        String
+  description String?
+  value       String
+
+  createdAt DateTime  @default(now())
+  editedAt  DateTime? @updatedAt
+
+  note   Note   @relation(fields: [noteId], references: [id])
+  noteId String @db.Uuid
 }
 
 model NotesSavedOnUsers {

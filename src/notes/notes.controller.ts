@@ -13,6 +13,8 @@ import {
 import { ParamsDictionary } from "express-serve-static-core";
 import { UpdateLanguageRequestDto } from "../languages/dtos/updateLanguageRequest.dto";
 import { UpdateNoteRequestSchema } from "./dtos/updateNoteRequest.dto";
+import { CreateNotePropertyRequestSchema } from "./dtos/createNotePropertyRequest.dto";
+import { UpdateNotePropertyRequestSchema } from "./dtos/updateNotePropertyRequest.dto";
 
 const router = Router();
 
@@ -537,6 +539,131 @@ router.route("/quiz/question/answer/:id").post(
     }
 
     res.status(StatusCodes.OK).json(answerResponse);
+  }),
+);
+
+// Create note property
+// POST: /api/notes/create/note-property
+router.route("/create/note-property").post(
+  authGuard(Roles.USER),
+  asyncHandler(async (req, res) => {
+    const userId = req.userId;
+
+    if (!userId) {
+      res.status(StatusCodes.UNAUTHORIZED).json({ error: "Unauthorized" });
+      return;
+    }
+
+    const parsedBody = CreateNotePropertyRequestSchema.safeParse(req.body);
+
+    if (!parsedBody.success) {
+      res.status(StatusCodes.BAD_REQUEST).json({ error: "Invalid body" });
+      return;
+    }
+
+    const note = await notesRepository.getNoteById(parsedBody.data.noteId);
+
+    if (!note) {
+      res.status(StatusCodes.NOT_FOUND).json({ error: "Note not found" });
+      return;
+    }
+
+    if (!req.isAdmin && note.language.ownerId !== userId) {
+      res.status(StatusCodes.FORBIDDEN).json({ error: "Forbidden" });
+      return;
+    }
+
+    const noteProperty = await notesRepository.createNoteProperty(
+      parsedBody.data,
+    );
+
+    res.status(StatusCodes.CREATED).json(noteProperty);
+  }),
+);
+
+// Update note property
+// PUT: /api/notes/create/note-property
+router.route("/update/note-property").put(
+  authGuard(Roles.USER),
+  asyncHandler(async (req, res) => {
+    const userId = req.userId;
+
+    if (!userId) {
+      res.status(StatusCodes.UNAUTHORIZED).json({ error: "Unauthorized" });
+      return;
+    }
+
+    const parsedBody = UpdateNotePropertyRequestSchema.safeParse(req.body);
+
+    if (!parsedBody.success) {
+      res.status(StatusCodes.BAD_REQUEST).json({ error: "Invalid body" });
+      return;
+    }
+
+    const noteProperty = await notesRepository.getNotePropertyById(
+      parsedBody.data.notePropertyId,
+    );
+
+    if (!noteProperty) {
+      res.status(StatusCodes.NOT_FOUND).json({ error: "Note not found" });
+      return;
+    }
+
+    if (!req.isAdmin && noteProperty.note.language.ownerId !== userId) {
+      res.status(StatusCodes.FORBIDDEN).json({ error: "Forbidden" });
+      return;
+    }
+
+    const updatedNoteProperty = await notesRepository.updateNoteProperty(
+      parsedBody.data,
+    );
+
+    res.status(StatusCodes.CREATED).json(updatedNoteProperty);
+  }),
+);
+
+// Delete note property
+// DELETE: /api/notes/delete/note-property/:id
+router.route("/delete/note-property/:id").delete(
+  authGuard(Roles.USER),
+  asyncHandler(async (req, res) => {
+    const userId = req.userId;
+
+    if (!userId) {
+      res.status(StatusCodes.UNAUTHORIZED).json({ error: "Unauthorized" });
+      return;
+    }
+
+    const parsedParams = ParamsIdSchema.safeParse(req.params);
+
+    if (!parsedParams.success) {
+      res
+        .status(StatusCodes.BAD_REQUEST)
+        .json({ error: "Invalid note property id" });
+      return;
+    }
+
+    const notePropertyId = parsedParams.data.id;
+
+    const noteProperty =
+      await notesRepository.getNotePropertyById(notePropertyId);
+
+    if (!noteProperty) {
+      res
+        .status(StatusCodes.NOT_FOUND)
+        .json({ error: "Note property not found" });
+      return;
+    }
+
+    if (!req.isAdmin && noteProperty.note.language.ownerId !== userId) {
+      res.status(StatusCodes.FORBIDDEN).json({ error: "Forbidden" });
+      return;
+    }
+
+    const deletedNoteProperty =
+      await notesRepository.deleteNotePropertyById(notePropertyId);
+
+    res.status(StatusCodes.OK).json({ deletedNoteProperty });
   }),
 );
 

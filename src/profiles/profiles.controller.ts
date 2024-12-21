@@ -251,7 +251,7 @@ router.route("/").put(
         const uniqueSuffix = Date.now();
         const fileName = `${slugifiedName}-${uniqueSuffix}.webp`;
         const userDir = path.join(
-          environment === "PRODUCTION" ? "/var/www/html/static" : "public",
+          environment === "PRODUCTION" ? "/var/www/html/static/SD" : "public",
           "profile",
           "userProfilePhotos",
           ownerId,
@@ -264,7 +264,7 @@ router.route("/").put(
         fs.mkdirSync(userDir, { recursive: true });
 
         savedPath = path.join(
-          environment === "PRODUCTION" ? "/var/www/html/static" : "public",
+          environment === "PRODUCTION" ? "/var/www/html/static/SD" : "public",
           "profile",
           "userProfilePhotos",
           ownerId,
@@ -272,7 +272,13 @@ router.route("/").put(
         );
 
         if (environment === "PRODUCTION") {
-          dbPath = path.join("profile", "userProfilePhotos", ownerId, fileName);
+          dbPath = path.join(
+            "SD",
+            "profile",
+            "userProfilePhotos",
+            ownerId,
+            fileName,
+          );
         } else {
           dbPath = path.join(
             "public",

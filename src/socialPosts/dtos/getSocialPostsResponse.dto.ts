@@ -1,6 +1,7 @@
 export type GetSocialPostResponseDto = {
   id: string;
   content: string;
+  isGenerated: boolean;
   createdAt: string;
   owner: {
     ownerId: string;

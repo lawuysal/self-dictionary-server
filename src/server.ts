@@ -13,6 +13,7 @@ import http from "http";
 dotenv.config({ path: "./.env.local" });
 
 import app from "./app";
+import "./cron/activatedJobs";
 
 const server = http.createServer(app);
 

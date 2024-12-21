@@ -5,7 +5,8 @@
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
+  previewFeatures = ["typedSql"]
 }
 
 datasource db {
@@ -26,9 +27,10 @@ model User {
   preferences Preference?
 
   // One to many
-  languages   Language[]
-  socialPosts SocialPost[]
-  TTSFile     TTSFile[]
+  languages                Language[]
+  socialPosts              SocialPost[]
+  TTSFile                  TTSFile[]
+  averageAllNotesIntensity CronDailyAverageAllNotesIntensity[]
 
   // Many to many
   roles                       RolesOnUsers[]
@@ -150,8 +152,9 @@ model Preference {
 }
 
 model SocialPost {
-  id      String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  content String
+  id          String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  content     String
+  isGenerated Boolean @default(false)
 
   createdAt DateTime @default(now())
 
@@ -198,4 +201,12 @@ model TTSFile {
 
   createdAt DateTime @default(now())
   createdBy User     @relation(fields: [createdById], references: [id])
+}
+
+model CronDailyAverageAllNotesIntensity {
+  id        Int      @id @default(autoincrement())
+  average   Float
+  createdAt DateTime @default(now())
+  owner     User     @relation(fields: [ownerId], references: [id])
+  ownerId   String   @db.Uuid
 }

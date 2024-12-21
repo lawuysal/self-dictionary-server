@@ -54,6 +54,7 @@ async function getLatestSocialPosts(page: number = 1, limit: number = 10) {
       return {
         id: socialPost.id,
         content: socialPost.content,
+        isGenerated: socialPost.isGenerated,
         createdAt: socialPost.createdAt.toISOString(),
         owner: {
           ownerId: socialPost.ownerId,
@@ -146,6 +147,7 @@ async function getPositiveActionedSocialPosts(
       return {
         id: socialPost.id,
         content: socialPost.content,
+        isGenerated: socialPost.isGenerated,
         createdAt: socialPost.createdAt.toISOString(),
         owner: {
           ownerId: socialPost.ownerId,
@@ -232,6 +234,7 @@ async function getMySocialPosts(
       return {
         id: socialPost.id,
         content: socialPost.content,
+        isGenerated: socialPost.isGenerated,
         createdAt: socialPost.createdAt.toISOString(),
         owner: {
           ownerId: socialPost.ownerId,
@@ -322,6 +325,7 @@ async function getUserSocialPostsByUsername(
       return {
         id: socialPost.id,
         content: socialPost.content,
+        isGenerated: socialPost.isGenerated,
         createdAt: socialPost.createdAt.toISOString(),
         owner: {
           ownerId: socialPost.ownerId,
@@ -414,6 +418,7 @@ async function getMyFollowedUsersSocialPosts(
       return {
         id: socialPost.id,
         content: socialPost.content,
+        isGenerated: socialPost.isGenerated,
         createdAt: socialPost.createdAt.toISOString(),
         owner: {
           ownerId: socialPost.ownerId,
@@ -491,6 +496,7 @@ async function getSocialPostById(socialPostId: string) {
   const socialPostResponse: GetSocialPostResponseDto = {
     id: socialPost.id,
     content: socialPost.content,
+    isGenerated: socialPost.isGenerated,
     createdAt: socialPost.createdAt.toISOString(),
     owner: {
       ownerId: socialPost.ownerId,
@@ -522,6 +528,7 @@ async function createSocialPost(data: CreateSocialPostRequestDto) {
     data: {
       content: data.content,
       ownerId: data.ownerId,
+      isGenerated: data.isGenerated,
     },
   });
   return socialPost;

@@ -9,7 +9,7 @@ import { z } from "zod";
 
 function extractSentences(text: string) {
   const pattern =
-    /sentence:([^\n]*?)(?:\s*(?:word|wordTranslation|sentenceTranslation):[^\n]*)*?\s*sentenceTranslation:([^\n]*?)(?:\s*(?:word|wordTranslation):[^\n]*)*(?:\n|$)/gs;
+    /sentence:([^\n]*?)(?:\s*(?:word|wordTranslation|sentenceTranslation|Translation):[^\n]*)*?(?:\s*(?:sentenceTranslation|Translation):([^\n]*?)(?:\s*(?:word|wordTranslation|sentenceTranslation|Translation):[^\n]*)*)?(?:\n|$)/gs;
 
   const matches = [...text.matchAll(pattern)];
 

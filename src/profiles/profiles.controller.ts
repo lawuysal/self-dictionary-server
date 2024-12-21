@@ -243,13 +243,14 @@ router.route("/").put(
       }
 
       let savedPath: string | undefined;
+      const environment = process.env.NODE_ENV || "";
 
       if (req.file) {
         const slugifiedName = slugify(username, { lower: true });
         const uniqueSuffix = Date.now();
         const fileName = `${slugifiedName}-${uniqueSuffix}.webp`;
         const userDir = path.join(
-          "public",
+          environment === "PRODUCTION" ? "/var/www/html/static" : "public",
           "profile",
           "userProfilePhotos",
           ownerId,

@@ -49,11 +49,17 @@ router.route("/").post(
         .json({ error: "No audio content" });
       return;
     }
-    fs.mkdirSync(`public/tts/${req.body.language}`, {
-      recursive: true,
-    });
+
+    const environment = process.env.NODE_ENV || "";
+
+    fs.mkdirSync(
+      `${environment === "PRODUCTION" ? "/var/www/html/static" : "public"}/tts/${req.body.language}`,
+      {
+        recursive: true,
+      },
+    );
     fs.writeFileSync(
-      `public/tts/${req.body.language}/${req.body.hash}.ogg`,
+      `${environment === "PRODUCTION" ? "/var/www/html/static" : "public"}/tts/${req.body.language}/${req.body.hash}.ogg`,
       response.audioContent,
       "base64",
     );
@@ -66,7 +72,7 @@ router.route("/").post(
       SupportedTTSLanguages.get(req.body.language)?.name as string,
       "OGG_OPUS",
       req.body.speed,
-      `public/tts/${req.body.language}/${req.body.hash}.ogg`,
+      `${environment === "PRODUCTION" ? "/var/www/html/static" : "public"}/tts/${req.body.language}/${req.body.hash}.ogg`,
     );
 
     res.status(StatusCodes.OK).json({ path: ttsRecord.filePath });

@@ -243,6 +243,7 @@ router.route("/").put(
       }
 
       let savedPath: string | undefined;
+      let dbPath;
       const environment = process.env.NODE_ENV || "";
 
       if (req.file) {
@@ -262,7 +263,25 @@ router.route("/").put(
 
         fs.mkdirSync(userDir, { recursive: true });
 
-        savedPath = path.join(userDir, fileName);
+        savedPath = path.join(
+          environment === "PRODUCTION" ? "/var/www/html/static" : "public",
+          "profile",
+          "userProfilePhotos",
+          ownerId,
+          fileName,
+        );
+
+        if (environment === "PRODUCTION") {
+          dbPath = path.join("profile", "userProfilePhotos", ownerId, fileName);
+        } else {
+          dbPath = path.join(
+            "public",
+            "profile",
+            "userProfilePhotos",
+            ownerId,
+            fileName,
+          );
+        }
 
         await sharp(req.file.buffer).webp({ quality: 70 }).toFile(savedPath);
       }
@@ -273,7 +292,7 @@ router.route("/").put(
         lastName,
         ownerId,
         username,
-        photoUrl: savedPath,
+        photoUrl: dbPath,
       });
 
       res.status(StatusCodes.CREATED).json(profile);

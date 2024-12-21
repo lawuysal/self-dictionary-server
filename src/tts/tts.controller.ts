@@ -72,7 +72,7 @@ router.route("/").post(
       SupportedTTSLanguages.get(req.body.language)?.name as string,
       "OGG_OPUS",
       req.body.speed,
-      `${environment === "PRODUCTION" ? "/var/www/html/static" : "public"}/tts/${req.body.language}/${req.body.hash}.ogg`,
+      `${environment === "PRODUCTION" ? "" : "public/"}tts/${req.body.language}/${req.body.hash}.ogg`,
     );
 
     res.status(StatusCodes.OK).json({ path: ttsRecord.filePath });

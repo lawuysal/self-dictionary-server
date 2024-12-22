@@ -1,5 +1,5 @@
 import express, { Request } from "express";
-import { SignupUserDto, SignupUserSchema } from "./dtos/signupUser.dto";
+import { SignupUserDto } from "./dtos/signupUser.dto";
 import { LoginUserDto, LoginUserSchema } from "./dtos/loginUser.dto";
 import { authRepository } from "./auth.repository";
 import { StatusCodes } from "http-status-codes";
@@ -42,15 +42,19 @@ router.route("/login").post(
 // POST: /api/auth/signup
 router.route("/signup").post(
   asyncHandler(async (req: Request<unknown, unknown, SignupUserDto>, res) => {
-    const parsedBody = SignupUserSchema.parse(req.body);
+    //   const parsedBody = SignupUserSchema.parse(req.body);
 
-    const { token, userId } = await authRepository.signupUser(parsedBody);
+    //   const { token, userId } = await authRepository.signupUser(parsedBody);
 
-    res.status(StatusCodes.OK).json({
-      token,
-      userId,
-      userEmail: parsedBody.email,
-    });
+    //   res.status(StatusCodes.OK).json({
+    //     token,
+    //     userId,
+    //     userEmail: parsedBody.email,
+    //   });
+
+    res
+      .status(StatusCodes.NOT_FOUND)
+      .json({ message: "This route is not implemented yet" });
   }),
 );
 

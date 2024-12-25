@@ -1,4 +1,4 @@
-import { Router } from "express";
+import { Router, Request } from "express";
 import { authGuard } from "../auth/middlewares/authGuard.middleware";
 import { Roles } from "../roles/enums/roles.enum";
 import asyncHandler from "../utils/asyncHandler";
@@ -9,13 +9,23 @@ import { checkTTSRecord } from "./middlewares/checkTTSRecord.middleware";
 import { SupportedTTSLanguages } from "./enums/supportedTTSLanguages.enum";
 import { ttsRepository } from "./tts.repository";
 import { SupportedTTSSpeeds } from "./enums/supportedTTSSpeeds.enum";
+import rateLimit from "express-rate-limit";
 
 const router = Router();
 const ttsClient = new TextToSpeechClient();
 
+const limiter = rateLimit({
+  identifier: (req: Request) => req.userId!,
+  windowMs: 5 * 60 * 1000,
+  limit: 100,
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
 // Get TTS file path
 // POST /api/tts
 router.route("/").post(
+  limiter,
   authGuard(Roles.USER),
   checkTTSRecord,
   asyncHandler(async (req, res) => {

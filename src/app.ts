@@ -1,4 +1,4 @@
-import express from "express";
+import express, { Request } from "express";
 import cors from "cors";
 import morgan from "morgan";
 import bodyParser from "body-parser";
@@ -15,8 +15,37 @@ import { usersController } from "./users/users.controller";
 import { dictionaryApiController } from "./dictionaryApi/dictionaryApi.controller";
 import { ttsController } from "./tts/tts.controller";
 import { generativeAIController } from "./generativeAI/generativeAI.controller";
+import rateLimit from "express-rate-limit";
+import slowDown from "express-slow-down";
 
 const app = express();
+
+const limiterMinutely = rateLimit({
+  identifier: (req: Request) => req.ip!,
+  windowMs: 1 * 60 * 1000,
+  limit: 200,
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+const limiterHourly = rateLimit({
+  identifier: (req: Request) => req.ip!,
+  windowMs: 5 * 60 * 1000,
+  limit: 10000,
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+const slower = slowDown({
+  identifier: (req: Request) => req.ip!,
+  windowMs: 15 * 60 * 1000,
+  delayAfter: 100,
+  delayMs: () => 300,
+});
+
+app.use(limiterMinutely);
+app.use(limiterHourly);
+app.use(slower);
 
 // using morgan for logs
 app.use(morgan("dev"));

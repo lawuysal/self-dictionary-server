@@ -20,9 +20,7 @@ import { Roles } from "../roles/enums/roles.enum";
  * @throws {AppError} Throws an AppError (HTTP 404) if the role is not found.
  * @throws {Error} Throws an error if there is an issue with the database or other unexpected errors.
  */
-async function signupUser(
-  signupData: SignupUserDto,
-): Promise<{ token: string; userId: string }> {
+async function signupUser(signupData: SignupUserDto) {
   const { email, password } = signupData;
 
   const existingUser = await prisma.user.findUnique({ where: { email } });
@@ -32,8 +30,17 @@ async function signupUser(
   }
 
   const hashedPassword = await bcrypt.hash(password, 10);
+
+  const emailVerificationToken = jwt.sign(
+    { userEmail: email },
+    process.env.JWT_SECRET!,
+    {
+      expiresIn: process.env.JWT_EMAIL_VERIFICATION_EXPIRES_IN,
+    },
+  );
+
   const user = await prisma.user.create({
-    data: { email, password: hashedPassword },
+    data: { email, password: hashedPassword, emailVerificationToken },
   });
 
   const role = await prisma.role.findFirst({ where: { name: Roles.USER } });
@@ -49,11 +56,7 @@ async function signupUser(
     },
   });
 
-  const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET!, {
-    expiresIn: process.env.JWT_EXPIRES_IN,
-  });
-
-  return { token, userId: user.id };
+  return { emailVerificationToken };
 }
 
 /**
@@ -82,6 +85,10 @@ async function loginUser(
     return null;
   }
 
+  if (!user.isEmailVerified) {
+    throw new AppError("Email not verified", StatusCodes.UNAUTHORIZED);
+  }
+
   const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET!, {
     expiresIn: process.env.JWT_EXPIRES_IN,
   });
@@ -89,4 +96,34 @@ async function loginUser(
   return { token, userId: user.id };
 }
 
-export const authRepository = { loginUser, signupUser };
+async function verifyEmail(emailVerificationToken: string) {
+  const decoded = jwt.verify(
+    emailVerificationToken,
+    process.env.JWT_SECRET!,
+  ) as { userEmail: string };
+
+  let user = await prisma.user.findUnique({
+    where: { email: decoded.userEmail },
+  });
+
+  if (!user) {
+    throw new AppError("Invalid Verification Token", StatusCodes.BAD_REQUEST);
+  }
+
+  if (user.isEmailVerified) {
+    throw new AppError("Email already verified", StatusCodes.CONFLICT);
+  }
+
+  user = await prisma.user.update({
+    where: { id: user.id },
+    data: {
+      isEmailVerified: true,
+      emailVerifiedAt: new Date(),
+      emailVerificationToken: null,
+    },
+  });
+
+  return user;
+}
+
+export const authRepository = { loginUser, signupUser, verifyEmail };

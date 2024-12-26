@@ -6,6 +6,7 @@ export const SignupUserSchema = z.object({
     .string()
     .min(6, "Password must be at least 6 characters long")
     .max(30, "Password must be at most 30 characters long"),
+  captchaToken: z.string(),
 });
 
 export type SignupUserDto = z.infer<typeof SignupUserSchema>;

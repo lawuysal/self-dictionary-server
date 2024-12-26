@@ -2,7 +2,7 @@ import nodemailer from "nodemailer";
 import { AppError } from "../middlewares/globalErrorMiddleware";
 import { StatusCodes } from "http-status-codes";
 
-export async function sendEmailVerification({
+export async function sendEmail({
   to,
   subject,
   text,
@@ -30,7 +30,6 @@ export async function sendEmailVerification({
     };
 
     await transporter.sendMail(mailOptions);
-    console.log("Email sent to:", to);
   } catch (error) {
     console.error("Error sending email:", error);
     throw new AppError(

@@ -14,7 +14,7 @@ import { Roles } from "../roles/enums/roles.enum";
  * @param {SignupUserDto} signupData - The signup credentials for the user.
  * @param {string} signupData.mail - The user's email address.
  * @param {string} signupData.password - The user's password.
- * @returns {Promise<{ token: string; userId: string }} A promise that resolves to an object containing the token and user ID if signup is successful, or null if the signup fails.
+ * successful, or null if the signup fails.
  *
  * @throws {AppError} Throws an AppError (HTTP 409) if there is an exsiting user with the same email address.
  * @throws {AppError} Throws an AppError (HTTP 404) if the role is not found.
@@ -126,4 +126,85 @@ async function verifyEmail(emailVerificationToken: string) {
   return user;
 }
 
-export const authRepository = { loginUser, signupUser, verifyEmail };
+async function checkPasswordResetToken(passwordResetToken: string) {
+  const decoded = jwt.verify(passwordResetToken, process.env.JWT_SECRET!) as {
+    userEmail: string;
+  };
+
+  const user = await prisma.user.findUnique({
+    where: { email: decoded.userEmail },
+  });
+
+  if (!user) {
+    throw new AppError("Invalid Password Reset Token", StatusCodes.BAD_REQUEST);
+  }
+
+  if (user.passwordResetToken !== passwordResetToken) {
+    throw new AppError("Invalid Password Reset Token", StatusCodes.BAD_REQUEST);
+  }
+
+  return user;
+}
+
+async function forgotPassword(email: string) {
+  let user = await prisma.user.findUnique({ where: { email } });
+
+  if (!user) {
+    return null;
+  }
+
+  const passwordResetToken = jwt.sign(
+    { userEmail: email },
+    process.env.JWT_SECRET!,
+    {
+      expiresIn: process.env.JWT_PASSWORD_RESET_EXPIRES_IN,
+    },
+  );
+
+  user = await prisma.user.update({
+    where: { id: user.id },
+    data: { passwordResetToken },
+  });
+
+  return user;
+}
+
+async function resetPassword(passwordResetToken: string, password: string) {
+  const decoded = jwt.verify(passwordResetToken, process.env.JWT_SECRET!) as {
+    userEmail: string;
+  };
+
+  let user = await prisma.user.findUnique({
+    where: { email: decoded.userEmail },
+  });
+
+  if (!user) {
+    return null;
+  }
+
+  if (user.passwordResetToken !== passwordResetToken) {
+    throw new AppError("Invalid Password Reset Token", StatusCodes.BAD_REQUEST);
+  }
+
+  const hashedPassword = await bcrypt.hash(password, 10);
+
+  user = await prisma.user.update({
+    where: { id: user.id },
+    data: {
+      password: hashedPassword,
+      passwordResetToken: null,
+      passwordResetAt: new Date(),
+    },
+  });
+
+  return user;
+}
+
+export const authRepository = {
+  loginUser,
+  signupUser,
+  verifyEmail,
+  forgotPassword,
+  checkPasswordResetToken,
+  resetPassword,
+};

@@ -7,17 +7,24 @@ import asyncHandler from "../utils/asyncHandler";
 import { authGuard } from "./middlewares/authGuard.middleware";
 import { Roles } from "../roles/enums/roles.enum";
 import { profilesRepository } from "../profiles/profiles.repository";
-import { sendEmailVerification } from "../emails/sendEmailVerification";
+import { sendEmail } from "../emails/sendEmail";
 import rateLimit from "express-rate-limit";
-import { RecaptchaEnterpriseServiceClient } from "@google-cloud/recaptcha-enterprise";
+import { createCaptchaAssessment } from "../utils/createCaptchaAssessment";
+import { z } from "zod";
 
 const router = express.Router();
 
-const client = new RecaptchaEnterpriseServiceClient();
-
-const verifyEmaiLimiter = rateLimit({
+const verifyEmailLimiter = rateLimit({
   identifier: (req: Request) => req.ip!,
   windowMs: 10 * 60 * 1000,
+  max: 5,
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+const signupLimiter = rateLimit({
+  identifier: (req: Request) => req.ip!,
+  windowMs: 60 * 60 * 1000,
   max: 5,
   standardHeaders: true,
   legacyHeaders: false,
@@ -54,6 +61,7 @@ router.route("/login").post(
 // Signup user and return a JWT token and user id
 // POST: /api/auth/signup
 router.route("/signup").post(
+  signupLimiter,
   asyncHandler(async (req: Request<unknown, unknown, SignupUserDto>, res) => {
     const parsedBody = SignupUserSchema.safeParse(req.body);
 
@@ -66,7 +74,7 @@ router.route("/signup").post(
 
     const recaptchaSiteKey = process.env.RECAPTCHA_SITE_KEY;
 
-    const score = await createAssessment({
+    const score = await createCaptchaAssessment({
       recaptchaKey: recaptchaSiteKey,
       token: parsedBody.data.captchaToken,
     });
@@ -82,7 +90,7 @@ router.route("/signup").post(
       parsedBody.data,
     );
 
-    await sendEmailVerification({
+    await sendEmail({
       to: parsedBody.data.email,
       subject: "Verifiy Your Email Address - Self Dictionary",
       text: `Hi ${parsedBody.data.email}, thanks for signing up with Self Dictionary! Please click the following link to verify your email address: ${process.env.CLIENT_URL}/verify-email/${emailVerificationToken}`,
@@ -101,7 +109,7 @@ router.route("/me").get(authGuard(Roles.USER), (req, res) => {
 // Verify the email of the user with the given token
 // GET: /api/auth/verify-email/:token
 router.route("/verify-email/:token").get(
-  verifyEmaiLimiter,
+  verifyEmailLimiter,
   asyncHandler(async (req, res) => {
     const { token } = req.params;
 
@@ -116,64 +124,122 @@ router.route("/verify-email/:token").get(
   }),
 );
 
-async function createAssessment({
-  projectID = "self-dictionary-org-cloud",
-  recaptchaKey,
-  token,
-  recaptchaAction = "signup",
-}: {
-  projectID?: string;
-  recaptchaKey?: string;
-  token?: string;
-  recaptchaAction?: string;
-}) {
-  const projectPath = client.projectPath(projectID);
-
-  // Build the assessment request.
-  const request = {
-    assessment: {
-      event: {
-        token: token,
-        siteKey: recaptchaKey,
-      },
-    },
-    parent: projectPath,
-  };
-
-  const [response] = await client.createAssessment(request);
-
-  // Check if the token is valid.
-  if (!response.tokenProperties || !response.tokenProperties.valid) {
-    if (!response.tokenProperties) {
-      console.log(
-        "The CreateAssessment call failed because the token properties are null or undefined",
-      );
-      return null;
-    }
-    console.log(
-      `The CreateAssessment call failed because the token was: ${response.tokenProperties.invalidReason}`,
-    );
-    return null;
-  }
-
-  // Check if the expected action was executed.
-  // The `action` property is set by user client in the grecaptcha.enterprise.execute() method.
-  if (response.tokenProperties.action === recaptchaAction) {
-    // Get the risk score and the reason(s).
-    // For more information on interpreting the assessment, see:
-    // https://cloud.google.com/recaptcha-enterprise/docs/interpret-assessment
-    console.log(`The reCAPTCHA score is: ${response.riskAnalysis?.score}`);
-    response.riskAnalysis?.reasons?.forEach((reason) => {
-      console.log(reason);
+// Send password reset email to the user with the given email
+// POST: /api/auth/forgot-password
+router.route("/forgot-password").post(
+  asyncHandler(async (req, res) => {
+    const requestBodySchema = z.object({
+      email: z.string().email(),
+      captchaToken: z.string(),
     });
 
-    return response.riskAnalysis?.score;
-  } else {
-    console.log(
-      "The action attribute in your reCAPTCHA tag does not match the action you are expecting to score",
+    const parsedBody = requestBodySchema.safeParse(req.body);
+
+    if (!parsedBody.success) {
+      res.status(StatusCodes.BAD_REQUEST).json({
+        error: parsedBody.error,
+      });
+      return;
+    }
+
+    const recaptchaSiteKey = process.env.RECAPTCHA_SITE_KEY;
+
+    const score = await createCaptchaAssessment({
+      recaptchaKey: recaptchaSiteKey,
+      token: parsedBody.data.captchaToken,
+    });
+
+    if (!score || score < 0.3) {
+      res.status(StatusCodes.BAD_REQUEST).json({
+        error: "Invalid captcha token",
+      });
+      return;
+    }
+
+    const user = await authRepository.forgotPassword(parsedBody.data.email);
+
+    if (!user) {
+      res.status(StatusCodes.OK).json({ error: "Password reset email sent" });
+      return;
+    }
+
+    await sendEmail({
+      to: parsedBody.data.email,
+      subject: "Reset Your Password - Self Dictionary",
+      text: `Hi ${parsedBody.data.email}, please click the following link to reset your password: ${process.env.CLIENT_URL}/reset-password/${user.passwordResetToken}`,
+    });
+
+    res.status(StatusCodes.OK).json({ message: "Password reset email sent" });
+  }),
+);
+
+// Check if the password reset token is valid
+// GET: /api/auth/reset-password/:token
+router.route("/reset-password/:token").get(
+  asyncHandler(async (req, res) => {
+    const { token } = req.params;
+
+    const user = await authRepository.checkPasswordResetToken(token);
+
+    if (!user) {
+      res.status(StatusCodes.NOT_FOUND).json({ error: "Invalid token" });
+      return;
+    }
+
+    res.status(StatusCodes.OK).json({ message: "Valid token" });
+  }),
+);
+
+// Reset the password of the user with the given token
+// POST: /api/auth/reset-password/:token
+router.route("/reset-password/:token").post(
+  asyncHandler(async (req, res) => {
+    const { token } = req.params;
+
+    const requestBodySchema = z.object({
+      password: z.string().min(8),
+      passwordConfirmation: z.string().min(8),
+      captchaToken: z.string(),
+    });
+
+    const parsedBody = requestBodySchema.safeParse(req.body);
+
+    if (
+      !parsedBody.success ||
+      parsedBody.data.password !== parsedBody.data.passwordConfirmation
+    ) {
+      res.status(StatusCodes.BAD_REQUEST).json({
+        error: "Passwords do not match or are less than 8 characters",
+      });
+      return;
+    }
+
+    const recaptchaSiteKey = process.env.RECAPTCHA_SITE_KEY;
+
+    const score = await createCaptchaAssessment({
+      recaptchaKey: recaptchaSiteKey,
+      token: parsedBody.data.captchaToken,
+    });
+
+    if (!score || score < 0.3) {
+      res.status(StatusCodes.BAD_REQUEST).json({
+        error: "Invalid captcha token",
+      });
+      return;
+    }
+
+    const user = await authRepository.resetPassword(
+      token,
+      parsedBody.data.password,
     );
-    return null;
-  }
-}
+
+    if (!user) {
+      res.status(StatusCodes.NOT_FOUND).json({ error: "Invalid token" });
+      return;
+    }
+
+    res.status(StatusCodes.OK).json({ message: "Password reset" });
+  }),
+);
 
 export const authController = router;

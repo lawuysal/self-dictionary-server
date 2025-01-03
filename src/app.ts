@@ -30,7 +30,7 @@ const limiterMinutely = rateLimit({
 
 const limiterHourly = rateLimit({
   identifier: (req: Request) => req.ip!,
-  windowMs: 5 * 60 * 1000,
+  windowMs: 60 * 60 * 1000,
   limit: 10000,
   standardHeaders: true,
   legacyHeaders: false,

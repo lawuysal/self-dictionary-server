@@ -58,7 +58,7 @@ router.route("/login").post(
   }),
 );
 
-// Signup user and return a JWT token and user id
+// Signup user
 // POST: /api/auth/signup
 router.route("/signup").post(
   signupLimiter,

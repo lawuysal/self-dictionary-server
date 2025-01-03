@@ -1,14 +1,6 @@
 import { CronJob } from "cron";
 import { getAverageNoteIntensity } from "./cronFunctions";
 
-const job = new CronJob(
-  "* * * * * *",
-  function () {
-    console.log("You will see this message every second");
-  },
-  null,
-);
-
 const getAverageIntensityOfUser = new CronJob(
   "*/5 * * * * *",
   function () {
@@ -18,6 +10,5 @@ const getAverageIntensityOfUser = new CronJob(
 );
 
 export const cronJobs = {
-  job,
   getAverageIntensityOfUser,
 };

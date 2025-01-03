@@ -410,7 +410,7 @@ router.route("/:id").delete(
 
     await notesRepository.deleteNoteById(noteId);
 
-    res.status(StatusCodes.NO_CONTENT).send();
+    res.status(StatusCodes.OK).json({ message: "Note deleted" });
   }),
 );
 

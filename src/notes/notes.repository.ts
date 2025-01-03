@@ -154,6 +154,9 @@ async function updateNote(id: string, updateData: UpdateNoteRequestDto) {
 }
 
 async function deleteNoteById(id: string) {
+  await prisma.noteProperty.deleteMany({ where: { noteId: id } });
+  await prisma.notesSavedOnUsers.deleteMany({ where: { noteId: id } });
+
   const note = await prisma.note.delete({ where: { id } });
   return note;
 }

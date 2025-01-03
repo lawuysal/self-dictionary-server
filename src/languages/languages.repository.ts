@@ -2,8 +2,6 @@ import { prisma } from "@/prisma/client";
 import { CreateLanguageRequestDto } from "./dtos/createLanguageRequest.dto";
 import { UpdateLanguageRequestDto } from "./dtos/updateLanguageRequest.dto";
 import { Language } from "@prisma/client";
-import { StatusCodes } from "http-status-codes";
-import { AppError } from "../middlewares/globalErrorMiddleware";
 import { GetLanguageNoteCountsResponse } from "./dtos/getLanguageNoteCountsResponse.dto";
 
 /**
@@ -126,14 +124,7 @@ async function deleteLanguage(id: string): Promise<Language> {
     throw new Error("Language not found");
   }
 
-  const notes = await prisma.note.findMany({ where: { languageId: id } });
-
-  if (notes.length > 0) {
-    throw new AppError(
-      "Cannot delete language with notes",
-      StatusCodes.CONFLICT,
-    );
-  }
+  await prisma.note.deleteMany({ where: { languageId: id } });
 
   const deletedLanguage = await prisma.language.delete({ where: { id } });
 

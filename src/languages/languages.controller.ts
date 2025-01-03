@@ -244,7 +244,7 @@ router.route("/:id").delete(
 
     await languagesRepository.deleteLanguage(languageId);
 
-    res.status(StatusCodes.NO_CONTENT).send();
+    res.status(StatusCodes.OK).json({ message: "Language deleted" });
   }),
 );
 

@@ -17,6 +17,7 @@ import { ttsController } from "./tts/tts.controller";
 import { generativeAIController } from "./generativeAI/generativeAI.controller";
 import rateLimit from "express-rate-limit";
 import slowDown from "express-slow-down";
+import { cronController } from "./cron/cron.controller";
 
 const app = express();
 
@@ -75,6 +76,7 @@ app.use("/api/social-posts", socialPostsController);
 app.use("/api/dict-api", dictionaryApiController);
 app.use("/api/tts", ttsController);
 app.use("/api/generative-ai", generativeAIController);
+app.use("/api/cron", cronController);
 
 app.use(globalErrorHandler);
 

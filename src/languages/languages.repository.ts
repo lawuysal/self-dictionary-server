@@ -3,6 +3,7 @@ import { CreateLanguageRequestDto } from "./dtos/createLanguageRequest.dto";
 import { UpdateLanguageRequestDto } from "./dtos/updateLanguageRequest.dto";
 import { Language } from "@prisma/client";
 import { GetLanguageNoteCountsResponse } from "./dtos/getLanguageNoteCountsResponse.dto";
+import { GetLanguageNoteCountsByUserIdDto } from "./dtos/getLanguageNoteCountsByUserId.dto";
 
 /**
  * Gets all languages.
@@ -124,6 +125,8 @@ async function deleteLanguage(id: string): Promise<Language> {
     throw new Error("Language not found");
   }
 
+  await prisma.noteProperty.deleteMany({ where: { note: { languageId: id } } });
+
   await prisma.note.deleteMany({ where: { languageId: id } });
 
   const deletedLanguage = await prisma.language.delete({ where: { id } });
@@ -193,6 +196,74 @@ async function getLanguageNoteCounts(languageId: string) {
   return noteCounts;
 }
 
+async function getLanguageNoteCountsByUserId(userId: string) {
+  const noteCounts = await prisma.note.findMany({
+    distinct: ["languageId"],
+    select: {
+      language: {
+        select: {
+          id: true,
+          name: true,
+          _count: {
+            select: {
+              notes: true,
+            },
+          },
+        },
+      },
+    },
+    where: {
+      language: {
+        ownerId: userId,
+      },
+    },
+  });
+
+  const noteCountsResponse: GetLanguageNoteCountsByUserIdDto = noteCounts.map(
+    (note) => ({
+      languageId: note.language.id,
+      languageName: note.language.name,
+      noteCount: note.language._count.notes,
+    }),
+  );
+
+  return { noteCountsResponse };
+}
+
+async function addQuizScore(
+  userId: string,
+  correctAnswers: number,
+  wrongAnswers: number,
+) {
+  const addedScore = await prisma.latestQuizScores.create({
+    data: {
+      ownerId: userId,
+      correctAnswers,
+      wrongAnswers,
+    },
+  });
+
+  return addedScore;
+}
+
+async function getLatestQuizScores(userId: string) {
+  const latestScores = await prisma.latestQuizScores.findMany({
+    where: {
+      ownerId: userId,
+    },
+    select: {
+      correctAnswers: true,
+      wrongAnswers: true,
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
+    take: 7,
+  });
+
+  return latestScores;
+}
+
 export const languagesRepository = {
   getLanguages,
   getLanguageById,
@@ -201,4 +272,7 @@ export const languagesRepository = {
   updateLanguage,
   deleteLanguage,
   getLanguageNoteCounts,
+  getLanguageNoteCountsByUserId,
+  addQuizScore,
+  getLatestQuizScores,
 };

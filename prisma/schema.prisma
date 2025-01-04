@@ -39,6 +39,7 @@ model User {
   socialPosts              SocialPost[]
   TTSFile                  TTSFile[]
   averageAllNotesIntensity CronDailyAverageAllNotesIntensity[]
+  latestQuizScores         LatestQuizScores[]
 
   // Many to many
   roles                       RolesOnUsers[]
@@ -212,9 +213,22 @@ model TTSFile {
 }
 
 model CronDailyAverageAllNotesIntensity {
-  id        Int      @id @default(autoincrement())
-  average   Float
+  id      Int   @id @default(autoincrement())
+  average Float
+
   createdAt DateTime @default(now())
-  owner     User     @relation(fields: [ownerId], references: [id])
-  ownerId   String   @db.Uuid
+
+  owner   User   @relation(fields: [ownerId], references: [id])
+  ownerId String @db.Uuid
+}
+
+model LatestQuizScores {
+  id             Int @id @default(autoincrement())
+  correctAnswers Int
+  wrongAnswers   Int
+
+  createdAt DateTime @default(now())
+
+  owner   User   @relation(fields: [ownerId], references: [id])
+  ownerId String @db.Uuid
 }

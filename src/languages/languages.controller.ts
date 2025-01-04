@@ -15,6 +15,7 @@ import {
 } from "./dtos/updateLanguageRequest.dto";
 import { z } from "zod";
 import { SupportedTTSLanguagesEnum } from "../tts/enums/supportedTTSLanguages.enum";
+import { AddQuizScoreRequestSchema } from "./dtos/addQuizScoreRequest.dto";
 
 const router = Router();
 
@@ -294,6 +295,36 @@ router.route("/note-counts/:id").get(
   }),
 );
 
+// Get language note counts by user id
+// GET: /api/languages/note-counts/user/:id
+router.route("/note-counts/user/:id").get(
+  authGuard(Roles.USER),
+  asyncHandler(async (req, res) => {
+    const userId = req.userId;
+
+    // Check if params are in the right type.
+    const parsedParams = ParamsIdSchema.safeParse(req.params);
+
+    if (!parsedParams.success) {
+      res.status(StatusCodes.BAD_REQUEST).json({ error: "Invalid user id" });
+      return;
+    }
+
+    const requestedUserId = parsedParams.data.id;
+
+    // Check if user is admin or owner of the language
+    if (!req.isAdmin && requestedUserId !== userId) {
+      res.status(StatusCodes.FORBIDDEN).json({ error: "Forbidden" });
+      return;
+    }
+
+    const noteCountsResponse =
+      await languagesRepository.getLanguageNoteCountsByUserId(requestedUserId);
+
+    res.status(StatusCodes.OK).json(noteCountsResponse);
+  }),
+);
+
 // Get all shadow languages
 // GET: /api/languages/shadow-languages/get
 router.route("/shadow-languages/get").get(
@@ -306,6 +337,57 @@ router.route("/shadow-languages/get").get(
       }),
     );
     res.status(StatusCodes.OK).json(shadowLanguages);
+  }),
+);
+
+// Add quiz score
+// POST: /api/languages/quiz-scores/latest
+router.route("/quiz-scores/latest").post(
+  authGuard(Roles.USER),
+  asyncHandler(async (req, res) => {
+    const userId = req.userId;
+
+    if (!userId) {
+      res.status(StatusCodes.UNAUTHORIZED).json({ error: "Unauthorized" });
+      return;
+    }
+
+    const parsedBody = AddQuizScoreRequestSchema.safeParse(req.body);
+
+    if (!parsedBody.success) {
+      res
+        .status(StatusCodes.BAD_REQUEST)
+        .json({ error: "Invalid quiz score data" });
+      return;
+    }
+
+    const { correctAnswers, wrongAnswers } = parsedBody.data;
+
+    const addedScore = await languagesRepository.addQuizScore(
+      userId,
+      correctAnswers,
+      wrongAnswers,
+    );
+
+    res.status(StatusCodes.CREATED).json(addedScore);
+  }),
+);
+
+// Get latest quiz scores
+// GET: /api/languages/quiz-scores/latest
+router.route("/quiz-scores/latest").get(
+  authGuard(Roles.USER),
+  asyncHandler(async (req, res) => {
+    const userId = req.userId;
+
+    if (!userId) {
+      res.status(StatusCodes.UNAUTHORIZED).json({ error: "Unauthorized" });
+      return;
+    }
+
+    const latestScores = await languagesRepository.getLatestQuizScores(userId);
+
+    res.status(StatusCodes.OK).json(latestScores);
   }),
 );
 
